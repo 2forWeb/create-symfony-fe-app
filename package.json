@@ -16,14 +16,16 @@
     "type": "commonjs",
     "main": "index.js",
     "bin": {
-        "create-symfony-fe-app": "./index.js"
+        "create-symfony-fe-app": "./dist/index.js"
     },
     "scripts": {
         "typecheck": "tsc --noEmit",
         "build": "node ./node_modules/.bin/vite build",
+        "build:watch": "node ./node_modules/.bin/vite build --watch",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "devDependencies": {
+        "@types/node": "^25.5.0",
         "typescript": "^5.9.3",
         "vite": "^8.0.1"
     }
