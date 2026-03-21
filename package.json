@@ -1,0 +1,30 @@
+{
+    "name": "create-symfony-fe-app",
+    "version": "1.0.0",
+    "description": "A tool to create a fancy vite based symfony front-end application where you can maintain your stimulus and react controllers in TypeScript on its own folder",
+    "keywords": [
+        "symfony",
+        "frontend",
+        "typescript",
+        "vite",
+        "stimulus",
+        "react",
+        "controllers"
+    ],
+    "license": "ISC",
+    "author": "Matias Jose",
+    "type": "commonjs",
+    "main": "index.js",
+    "bin": {
+        "create-symfony-fe-app": "./index.js"
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit",
+        "build": "node ./node_modules/.bin/vite build",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3",
+        "vite": "^8.0.1"
+    }
+}
