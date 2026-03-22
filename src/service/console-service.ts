@@ -9,12 +9,10 @@ export class ConsoleService {
         console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
     }
 
-    printHexColor(fgHex: string, bgHex: string | null, message: string) {
-        const fgColorCode = this.getHexColor(fgHex);
-        const bgColorCode = bgHex ? this.getHexColor(bgHex, true) : '';
+    printFormattedRgbColor(fgRgb: string, bgRgb: string | null, message: string) {
         const resetCode = this.getResetSequence();
 
-        console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
+        console.log(`${bgRgb || ''}${fgRgb}${message}${resetCode}`);
     }
 
     getRgbColor(color: RgbColor, background: boolean = false): string {
@@ -43,11 +41,12 @@ export class ConsoleService {
 
     getPalette(): ColorPalette {
         return {
-            primary: this.getHexColor('#0a50b3'),
+            primary: this.getHexColor('#3289cb'),
             secondary: this.getHexColor('#0fd374'),
             tertiary: this.getHexColor('#e5ec6f'),
             text: this.getHexColor('#bababa'),
-            textBright: this.getHexColor('#FFFFFF') ,
+            textBright: this.getHexColor('#FFFFFF'),
+            bgSelected: this.getHexColor('#7f868b', true),
         };
     }
 }

@@ -12,4 +12,5 @@ export interface ColorPalette {
     tertiary: string;
     text: string;
     textBright: string;
+    bgSelected: string;
 }
