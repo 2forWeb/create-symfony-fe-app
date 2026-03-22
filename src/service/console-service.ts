@@ -9,6 +9,14 @@ export class ConsoleService {
         console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
     }
 
+    printHexColor(fgHex: string, bgHex: string | null, message: string) {
+        const fgColorCode = this.getHexColor(fgHex);
+        const bgColorCode = bgHex ? this.getHexColor(bgHex, true) : '';
+        const resetCode = this.getResetSequence();
+
+        console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
+    }
+
     getRgbColor(color: RgbColor, background: boolean = false): string {
         return background ?
             `\x1b[48;2;${color.r};${color.g};${color.b}m` :
@@ -36,7 +44,8 @@ export class ConsoleService {
     getPalette(): ColorPalette {
         return {
             primary: this.getHexColor('#0a50b3'),
-            secondary: this.getHexColor('#073a18'),
+            secondary: this.getHexColor('#0fd374'),
+            tertiary: this.getHexColor('#e5ec6f'),
             text: this.getHexColor('#bababa'),
             textBright: this.getHexColor('#FFFFFF') ,
         };

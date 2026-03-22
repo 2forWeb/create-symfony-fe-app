@@ -7,6 +7,12 @@ var ConsoleService = class {
 		const resetCode = this.getResetSequence();
 		console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
 	}
+	printHexColor(fgHex, bgHex, message) {
+		const fgColorCode = this.getHexColor(fgHex);
+		const bgColorCode = bgHex ? this.getHexColor(bgHex, true) : "";
+		const resetCode = this.getResetSequence();
+		console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
+	}
 	getRgbColor(color, background = false) {
 		return background ? `\x1b[48;2;${color.r};${color.g};${color.b}m` : `\x1b[38;2;${color.r};${color.g};${color.b}m`;
 	}
@@ -28,7 +34,8 @@ var ConsoleService = class {
 	getPalette() {
 		return {
 			primary: this.getHexColor("#0a50b3"),
-			secondary: this.getHexColor("#073a18"),
+			secondary: this.getHexColor("#0fd374"),
+			tertiary: this.getHexColor("#e5ec6f"),
 			text: this.getHexColor("#bababa"),
 			textBright: this.getHexColor("#FFFFFF")
 		};
@@ -47,5 +54,14 @@ var version = new VersionService().getVersion();
 var consoleService = new ConsoleService();
 var p = consoleService.getPalette();
 var r = consoleService.getResetSequence();
-console.log(`\n${p.text}  Create Symfony FE App ${p.textBright}- ${p.primary}Version ${version}${r}\n\n`);
+console.log(`\n${p.text}  Create Symfony FE App ${p.textBright}- ${p.primary}Version ${version}${r}\n`);
+consoleService.printHexColor(p.text, null, "  Choose the components you want to add to your symfony application:\n");
+[
+	"TypeScript StimulusJS Controlleres",
+	"TypeScript React Components",
+	"TailwindCSS",
+	"OxLint/OxFormat"
+].forEach((option, index) => {
+	console.log(`${p.primary}  [${index === 0 ? p.tertiary + "■" + p.primary : " "}] ${p.textBright}${option}`);
+});
 //#endregion
