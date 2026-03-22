@@ -2,9 +2,36 @@
 //#region src/service/console-service.ts
 var ConsoleService = class {
 	printRgbColor(fgColor, bgColor, message) {
-		const fgColorCode = `\x1b[38;2;${fgColor.r};${fgColor.g};${fgColor.b}m`;
-		const bgColorCode = bgColor ? `\x1b[48;2;${bgColor.r};${bgColor.g};${bgColor.b}m` : "";
-		console.log(`${bgColorCode}${fgColorCode}${message}[0m`);
+		const fgColorCode = this.getRgbColor(fgColor);
+		const bgColorCode = bgColor ? this.getRgbColor(bgColor, true) : "";
+		const resetCode = this.getResetSequence();
+		console.log(`${bgColorCode}${fgColorCode}${message}${resetCode}`);
+	}
+	getRgbColor(color, background = false) {
+		return background ? `\x1b[48;2;${color.r};${color.g};${color.b}m` : `\x1b[38;2;${color.r};${color.g};${color.b}m`;
+	}
+	getHexColor(hex, background = false) {
+		const rgb = this.hexToRgb(hex);
+		return this.getRgbColor(rgb, background);
+	}
+	hexToRgb(hex) {
+		const bigint = parseInt(hex.replace("#", ""), 16);
+		return {
+			r: bigint >> 16 & 255,
+			g: bigint >> 8 & 255,
+			b: bigint & 255
+		};
+	}
+	getResetSequence() {
+		return "\x1B[0m";
+	}
+	getPalette() {
+		return {
+			primary: this.getHexColor("#0a50b3"),
+			secondary: this.getHexColor("#073a18"),
+			text: this.getHexColor("#bababa"),
+			textBright: this.getHexColor("#FFFFFF")
+		};
 	}
 };
 //#endregion
@@ -17,14 +44,8 @@ var VersionService = class {
 //#endregion
 //#region src/index.ts
 var version = new VersionService().getVersion();
-new ConsoleService().printRgbColor({
-	r: 206,
-	g: 80,
-	b: 150
-}, {
-	r: 50,
-	g: 50,
-	b: 50
-}, `Create Symfony FE App - Version ${version}`);
-console.log("\n");
+var consoleService = new ConsoleService();
+var p = consoleService.getPalette();
+var r = consoleService.getResetSequence();
+console.log(`\n${p.text}  Create Symfony FE App ${p.textBright}- ${p.primary}Version ${version}${r}\n\n`);
 //#endregion

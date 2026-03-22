@@ -5,11 +5,7 @@ const versionService = new VersionService();
 const version = versionService.getVersion();
 
 const consoleService = new ConsoleService();
+const p = consoleService.getPalette();
+const r = consoleService.getResetSequence();
 
-consoleService.printRgbColor(
-    { r: 206, g: 80, b: 150 },
-    { r: 50, g: 50, b: 50 },
-    `Create Symfony FE App - Version ${version}`
-);
-
-console.log('\n');
+console.log(`\n${p.text}  Create Symfony FE App ${p.textBright}- ${p.primary}Version ${version}${r}\n\n`);
