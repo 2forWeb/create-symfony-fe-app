@@ -43,7 +43,7 @@ export class TaskService {
         const T = this.p.textBright;
         const r = this.console.getResetSequence();
 
-        console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join('\n  ')}\n${r}`);
+        console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join(', ')}\n${r}`);
 
         const rl = readline.createInterface({
             input: process.stdin,

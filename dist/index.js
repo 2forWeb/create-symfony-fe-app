@@ -158,7 +158,7 @@ var TaskService = class {
 	async queryInstallNpmPackages(npmPackages) {
 		const T = this.p.textBright;
 		const r = this.console.getResetSequence();
-		console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join("\n  ")}\n${r}`);
+		console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join(", ")}\n${r}`);
 		if ((await node_readline_promises.createInterface({
 			input: process.stdin,
 			output: process.stdout
