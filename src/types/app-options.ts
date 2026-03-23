@@ -1,5 +1,6 @@
 export interface AppOption {
     name: string;
+    taskId: string;
     selected: boolean;
 }
 

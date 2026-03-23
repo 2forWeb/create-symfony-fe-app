@@ -10,6 +10,7 @@ export interface ColorPalette {
     primary: string;
     secondary: string;
     tertiary: string;
+    danger: string;
     text: string;
     textBright: string;
     bgSelected: string;

@@ -17,6 +17,7 @@ export default defineConfig({
         lib: false,
         rollupOptions: {
             input: 'src/index.ts',
+            external: ['node:readline', 'node:readline/promises'],
             output: {
                 entryFileNames: '[name].js',
                 format: 'cjs',

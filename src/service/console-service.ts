@@ -44,6 +44,7 @@ export class ConsoleService {
             primary: this.getHexColor('#3289cb'),
             secondary: this.getHexColor('#0fd374'),
             tertiary: this.getHexColor('#e5ec6f'),
+            danger: this.getHexColor('#871515'),
             text: this.getHexColor('#bababa'),
             textBright: this.getHexColor('#FFFFFF'),
             bgSelected: this.getHexColor('#7f868b', true),
