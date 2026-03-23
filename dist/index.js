@@ -126,28 +126,15 @@ var TaskService = class {
 		return [
 			{
 				name: "typescript-stimulus-controllers",
-				npmPackages: [
-					"@symfony/stimulus-bridge",
-					"@types/stimulus",
-					"stimulus"
-				]
+				npmPackages: ["@hotwired/stimulus", "typescript"]
 			},
 			{
 				name: "typescript-react-components",
-				npmPackages: [
-					"@types/react",
-					"@types/react-dom",
-					"react",
-					"react-dom"
-				]
+				npmPackages: ["@types/react", "react@18"]
 			},
 			{
 				name: "tailwindcss",
-				npmPackages: [
-					"tailwindcss",
-					"postcss",
-					"autoprefixer"
-				]
+				npmPackages: []
 			},
 			{
 				name: "oxlint-oxformat",
@@ -155,9 +142,10 @@ var TaskService = class {
 			}
 		];
 	}
-	async queryInstallNpmPackages(npmPackages) {
+	async queryInstallNpmPackages(options) {
 		const T = this.p.textBright;
 		const r = this.console.getResetSequence();
+		const npmPackages = this.getNpmPackages(options);
 		console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join(", ")}\n${r}`);
 		if ((await node_readline_promises.createInterface({
 			input: process.stdin,
@@ -166,11 +154,23 @@ var TaskService = class {
 		console.log(`\n  ${T}Installation cancelled. Exiting.${r}\n`);
 		return false;
 	}
-	prepareTasks(npmPackages, selectedTasks) {
+	prepareTasks(options) {
 		const npmTask = new NpmTask();
-		npmTask.npmPackages = npmPackages;
-		for (const task of selectedTasks);
+		npmTask.npmPackages = this.getNpmPackages(options);
+		for (const task of this.getSelectedTasks(options));
 		return [npmTask];
+	}
+	getNpmPackages(options) {
+		const selectedTasks = this.getSelectedTasks(options);
+		const npmPackages = ["vite", "vite-plugin-static-copy"];
+		selectedTasks.forEach((task) => {
+			if (task) npmPackages.push(...task.npmPackages);
+		});
+		return npmPackages.filter((pkg, index) => npmPackages.indexOf(pkg) === index);
+	}
+	getSelectedTasks(options) {
+		const taskData = this.getTasks();
+		return options.filter((option) => option.selected).map((option) => taskData.find((task) => task.name === option.taskId));
 	}
 	getSpinnerFrame() {
 		const frame = this.spinnerFrames[this.currentSpinnerStep];
@@ -283,15 +283,8 @@ var Application = class {
 		console.log(`  ${T}Installing client...${r}\n`);
 	}
 	async runTasks() {
-		const taskData = this.tasks.getTasks();
-		const selectedTasks = this.options.filter((option) => option.selected).map((option) => taskData.find((task) => task.name === option.taskId));
-		let npmPackages = [];
-		selectedTasks.forEach((task) => {
-			if (task) npmPackages.push(...task.npmPackages);
-		});
-		npmPackages = npmPackages.filter((pkg, index) => npmPackages.indexOf(pkg) === index);
-		if (!await this.tasks.queryInstallNpmPackages(npmPackages)) process.exit(0);
-		const preparedTasks = this.tasks.prepareTasks(npmPackages, selectedTasks);
+		if (!await this.tasks.queryInstallNpmPackages(this.options)) process.exit(0);
+		const preparedTasks = this.tasks.prepareTasks(this.options);
 		console.log("\n");
 		this.tasks.printTaskStatuses(preparedTasks);
 		let currentTaskIndex = 0;

@@ -121,27 +121,11 @@ export class Application {
     }
 
     private async runTasks() {
-        const taskData = this.tasks.getTasks();
-
-        const selectedTasks = this.options
-            .filter(option => option.selected)
-            .map(option => taskData.find((task) => task.name === option.taskId)) as Task[];
-        
-        let npmPackages: string[] = [];
-
-        selectedTasks.forEach(task => {
-            if (task) {
-                npmPackages.push(...task.npmPackages);
-            }
-        });
-
-        npmPackages = npmPackages.filter((pkg, index) => npmPackages.indexOf(pkg) === index);
-
-        if (!await this.tasks.queryInstallNpmPackages(npmPackages)) {
+        if (!await this.tasks.queryInstallNpmPackages(this.options)) {
             process.exit(0);
         }
 
-        const preparedTasks = this.tasks.prepareTasks(npmPackages, selectedTasks);
+        const preparedTasks = this.tasks.prepareTasks(this.options);
 
         console.log('\n');
         this.tasks.printTaskStatuses(preparedTasks);

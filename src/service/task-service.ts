@@ -5,6 +5,7 @@ import type { Task } from '../types/task';
 import { ConsoleService } from './console-service';
 import * as readline from 'node:readline/promises';
 import * as readlineSync from 'node:readline';
+import { AppOptions } from '../types/app-options';
 
 export class TaskService {
     console: ConsoleService;
@@ -22,15 +23,15 @@ export class TaskService {
         return [
             {
                 name: 'typescript-stimulus-controllers',
-                npmPackages: ['@symfony/stimulus-bridge', '@types/stimulus', 'stimulus'],
+                npmPackages: ['@hotwired/stimulus', 'typescript'],
             },
             {
                 name: 'typescript-react-components',
-                npmPackages: ['@types/react', '@types/react-dom', 'react', 'react-dom'],
+                npmPackages: ['@types/react', 'react@18'],
             },
             {
                 name: 'tailwindcss',
-                npmPackages: ['tailwindcss', 'postcss', 'autoprefixer'],
+                npmPackages: [],
             },
             {
                 name: 'oxlint-oxformat',
@@ -39,9 +40,11 @@ export class TaskService {
         ];
     }
 
-    async queryInstallNpmPackages(npmPackages: string[]) {
+    async queryInstallNpmPackages(options: AppOptions) {
         const T = this.p.textBright;
         const r = this.console.getResetSequence();
+
+        const npmPackages = this.getNpmPackages(options);
 
         console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join(', ')}\n${r}`);
 
@@ -61,17 +64,38 @@ export class TaskService {
         return false;
     }
 
-    prepareTasks(npmPackages: string[], selectedTasks: Task[]): BaseTask[] {
+    prepareTasks(options: AppOptions): BaseTask[] {
         const npmTask = new NpmTask();
-        npmTask.npmPackages = npmPackages;
+        npmTask.npmPackages = this.getNpmPackages(options);
 
-        for (const task of selectedTasks) {
+        for (const task of this.getSelectedTasks(options)) {
             // TODO: Add tasks
         }
 
         return [
             npmTask,
         ];
+    }
+
+    getNpmPackages(options: AppOptions): string[] {
+        const selectedTasks = this.getSelectedTasks(options);
+        const npmPackages: string[] = ['vite', 'vite-plugin-static-copy'];
+
+        selectedTasks.forEach(task => {
+            if (task) {
+                npmPackages.push(...task.npmPackages);
+            }
+        });
+
+        return npmPackages.filter((pkg, index) => npmPackages.indexOf(pkg) === index);
+    }
+
+    getSelectedTasks(options: AppOptions): Task[] {
+        const taskData = this.getTasks();
+
+        return options
+            .filter(option => option.selected)
+            .map(option => taskData.find((task) => task.name === option.taskId)) as Task[];
     }
 
     getSpinnerFrame() {
