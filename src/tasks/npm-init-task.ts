@@ -1,16 +1,16 @@
 import { exec } from 'node:child_process';
 import { BaseTask } from './base-task';
 
-export class NpmTask extends BaseTask {
-    name = 'Installing NPM Packages';
+export class NpmInitTask extends BaseTask {
+    name = 'Initializing NPM Project';
 
     npmPackages?: string[];
 
     async doRun(): Promise<void> {
         await new Promise((resolve, reject) => {
-            exec(`npm install -D ${this.npmPackages?.join(' ')}`, (error, _stdout, stderr) => {
+            exec(`npm init -y`, (error, _stdout, stderr) => {
                 if (error) {
-                    reject(new Error(`Failed to install npm packages: ${stderr}`));
+                    reject(new Error(`Failed to initialize node project: ${stderr}`));
                 } else {
                     resolve(undefined);
                 }

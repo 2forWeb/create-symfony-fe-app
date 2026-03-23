@@ -23,8 +23,11 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 //#endregion
 let node_readline = require("node:readline");
 node_readline = __toESM(node_readline);
+let node_child_process = require("node:child_process");
 let node_readline_promises = require("node:readline/promises");
 node_readline_promises = __toESM(node_readline_promises);
+let path = require("path");
+let node_fs = require("node:fs");
 //#region src/service/console-service.ts
 var ConsoleService = class {
 	printRgbColor(fgColor, bgColor, message) {
@@ -103,9 +106,28 @@ var NpmTask = class extends BaseTask {
 		this.name = "Installing NPM Packages";
 	}
 	async doRun() {
-		await new Promise((resolve, reject) => setTimeout(() => {
-			resolve(void 0);
-		}, 1e3));
+		await new Promise((resolve, reject) => {
+			(0, node_child_process.exec)(`npm install -D ${this.npmPackages?.join(" ")}`, (error, _stdout, stderr) => {
+				if (error) reject(/* @__PURE__ */ new Error(`Failed to install npm packages: ${stderr}`));
+				else resolve(void 0);
+			});
+		});
+	}
+};
+//#endregion
+//#region src/tasks/npm-init-task.ts
+var NpmInitTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Initializing NPM Project";
+	}
+	async doRun() {
+		await new Promise((resolve, reject) => {
+			(0, node_child_process.exec)(`npm init -y`, (error, _stdout, stderr) => {
+				if (error) reject(/* @__PURE__ */ new Error(`Failed to initialize node project: ${stderr}`));
+				else resolve(void 0);
+			});
+		});
 	}
 };
 //#endregion
@@ -119,6 +141,7 @@ var TaskService = class {
 			"/"
 		];
 		this.currentSpinnerStep = 0;
+		this.tasksDisplayed = 0;
 		this.console = new ConsoleService();
 		this.p = this.console.getPalette();
 	}
@@ -138,7 +161,7 @@ var TaskService = class {
 			},
 			{
 				name: "oxlint-oxformat",
-				npmPackages: ["oxlint", "oxformat"]
+				npmPackages: ["oxlint", "oxfmt"]
 			}
 		];
 	}
@@ -158,7 +181,10 @@ var TaskService = class {
 		const npmTask = new NpmTask();
 		npmTask.npmPackages = this.getNpmPackages(options);
 		for (const task of this.getSelectedTasks(options));
-		return [npmTask];
+		return [...this.shouldInitializeNpm() ? [new NpmInitTask()] : [], npmTask];
+	}
+	shouldInitializeNpm() {
+		return !(0, node_fs.existsSync)((0, path.resolve)(process.cwd(), "package.json"));
 	}
 	getNpmPackages(options) {
 		const selectedTasks = this.getSelectedTasks(options);
@@ -181,10 +207,13 @@ var TaskService = class {
 		const T = this.p.textBright;
 		const P = this.p.primary;
 		const r = this.console.getResetSequence();
+		this.tasksDisplayed = 0;
 		for (const task of tasks) {
-			console.log(`  ${T}[${this.printTaskStatusSymbol(task.status)}${T}] ${P}${task.name}${r}\n`);
+			console.log(`  ${T}[${this.printTaskStatusSymbol(task.status)}${T}] ${P}${task.name}${r}`);
+			this.tasksDisplayed++;
 			if (task.status === "pending") break;
 		}
+		console.log("");
 	}
 	printTaskStatusSymbol(status) {
 		const P = this.p.primary;
@@ -200,8 +229,7 @@ var TaskService = class {
 		}
 	}
 	async updateTaskStatuses(tasks) {
-		const tasksLength = tasks.filter((task) => task.status !== "pending").length;
-		node_readline.moveCursor(process.stdout, 0, -(tasksLength + 1));
+		node_readline.moveCursor(process.stdout, 0, -(this.tasksDisplayed + 1));
 		this.printTaskStatuses(tasks);
 	}
 };

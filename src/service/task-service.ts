@@ -5,7 +5,10 @@ import type { Task } from '../types/task';
 import { ConsoleService } from './console-service';
 import * as readline from 'node:readline/promises';
 import * as readlineSync from 'node:readline';
+import { resolve } from 'path';
+import { existsSync } from 'node:fs';
 import { AppOptions } from '../types/app-options';
+import { NpmInitTask } from '../tasks/npm-init-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -13,6 +16,7 @@ export class TaskService {
 
     spinnerFrames = ['-', '\\', '|', '/'];
     currentSpinnerStep = 0;
+    tasksDisplayed = 0;
 
     constructor() {
         this.console = new ConsoleService();
@@ -35,7 +39,7 @@ export class TaskService {
             },
             {
                 name: 'oxlint-oxformat',
-                npmPackages: ['oxlint', 'oxformat'],
+                npmPackages: ['oxlint', 'oxfmt'],
             },
         ];
     }
@@ -73,8 +77,14 @@ export class TaskService {
         }
 
         return [
+            ...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []),
             npmTask,
         ];
+    }
+
+    shouldInitializeNpm(): boolean {
+        const packagesJsonPath = resolve(process.cwd(), 'package.json');
+        return !existsSync(packagesJsonPath);
     }
 
     getNpmPackages(options: AppOptions): string[] {
@@ -110,12 +120,17 @@ export class TaskService {
         const P = this.p.primary;
         const r = this.console.getResetSequence();
 
+        this.tasksDisplayed = 0;
         for (const task of tasks) {
-            console.log(`  ${T}[${this.printTaskStatusSymbol(task.status)}${T}] ${P}${task.name}${r}\n`);
+            console.log(`  ${T}[${this.printTaskStatusSymbol(task.status)}${T}] ${P}${task.name}${r}`);
+            this.tasksDisplayed++;
+
             if (task.status === 'pending') {
                 break;
             }
         }
+
+        console.log('');
     }
 
     printTaskStatusSymbol(status: string) {
@@ -139,9 +154,7 @@ export class TaskService {
     }
 
     async updateTaskStatuses(tasks: BaseTask[]) {
-        const tasksLength = tasks.filter((task) => task.status !== 'pending').length;
-
-        readlineSync.moveCursor(process.stdout, 0, -(tasksLength + 1));
+        readlineSync.moveCursor(process.stdout, 0, -(this.tasksDisplayed + 1));
         this.printTaskStatuses(tasks);
     }
 }
