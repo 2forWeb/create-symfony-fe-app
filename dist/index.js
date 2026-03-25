@@ -131,6 +131,22 @@ var NpmInitTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/tasks/composer-task.ts
+var ComposerTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Installing Composer Packages";
+	}
+	async doRun() {
+		await new Promise((resolve, reject) => {
+			(0, node_child_process.exec)(`composer require ${this.composerPackages?.join(" ")}`, (error, _stdout, stderr) => {
+				if (error) reject(/* @__PURE__ */ new Error(`Failed to install composer packages: ${stderr}`));
+				else resolve(void 0);
+			});
+		});
+	}
+};
+//#endregion
 //#region src/service/task-service.ts
 var TaskService = class {
 	constructor() {
@@ -149,18 +165,22 @@ var TaskService = class {
 		return [
 			{
 				name: "typescript-stimulus-controllers",
+				composerPackages: [],
 				npmPackages: ["@hotwired/stimulus", "typescript"]
 			},
 			{
 				name: "typescript-react-components",
+				composerPackages: ["symfony/ux-react"],
 				npmPackages: ["@types/react", "react@18"]
 			},
 			{
 				name: "tailwindcss",
+				composerPackages: ["symfonycasts/tailwind-bundle"],
 				npmPackages: []
 			},
 			{
 				name: "oxlint-oxformat",
+				composerPackages: [],
 				npmPackages: ["oxlint", "oxfmt"]
 			}
 		];
@@ -169,6 +189,7 @@ var TaskService = class {
 		const T = this.p.textBright;
 		const r = this.console.getResetSequence();
 		const npmPackages = this.getNpmPackages(options);
+		if (npmPackages.length === 0) return true;
 		console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join(", ")}\n${r}`);
 		if ((await node_readline_promises.createInterface({
 			input: process.stdin,
@@ -177,14 +198,46 @@ var TaskService = class {
 		console.log(`\n  ${T}Installation cancelled. Exiting.${r}\n`);
 		return false;
 	}
+	async queryInstallComposerPackages(options) {
+		const T = this.p.textBright;
+		const r = this.console.getResetSequence();
+		const composerPackages = this.getComposerPackages(options);
+		if (composerPackages.length === 0) return true;
+		console.log(`\n${T}  The following composer packages will be installed:\n\n  ${this.p.primary}${composerPackages.join(", ")}\n${r}`);
+		if ((await node_readline_promises.createInterface({
+			input: process.stdin,
+			output: process.stdout
+		}).question(`${T}  Are you sure? (y/N) ${r}`)).match(/^y(es)?$/i)) return true;
+		console.log(`\n  ${T}Installation cancelled. Exiting.${r}\n`);
+		return false;
+	}
 	prepareTasks(options) {
-		const npmTask = new NpmTask();
-		npmTask.npmPackages = this.getNpmPackages(options);
+		const composerPackages = this.getComposerPackages(options);
+		const npmPackages = this.getNpmPackages(options);
+		const installTasks = [];
+		if (composerPackages.length > 0) {
+			const composerTask = new ComposerTask();
+			composerTask.composerPackages = composerPackages;
+			installTasks.push(composerTask);
+		}
+		if (npmPackages.length > 0) {
+			const npmTask = new NpmTask();
+			npmTask.npmPackages = npmPackages;
+			installTasks.push(npmTask);
+		}
 		for (const task of this.getSelectedTasks(options));
-		return [...this.shouldInitializeNpm() ? [new NpmInitTask()] : [], npmTask];
+		return [...this.shouldInitializeNpm() ? [new NpmInitTask()] : [], ...installTasks];
 	}
 	shouldInitializeNpm() {
 		return !(0, node_fs.existsSync)((0, path.resolve)(process.cwd(), "package.json"));
+	}
+	getComposerPackages(options) {
+		const selectedTasks = this.getSelectedTasks(options);
+		const composerPackages = [];
+		selectedTasks.forEach((task) => {
+			if (task) composerPackages.push(...task.composerPackages);
+		});
+		return composerPackages.filter((pkg, index) => composerPackages.indexOf(pkg) === index);
 	}
 	getNpmPackages(options) {
 		const selectedTasks = this.getSelectedTasks(options);
@@ -311,12 +364,12 @@ var Application = class {
 		console.log(`  ${T}Installing client...${r}\n`);
 	}
 	async runTasks() {
-		if (!await this.tasks.queryInstallNpmPackages(this.options)) process.exit(0);
+		if (!await this.tasks.queryInstallNpmPackages(this.options) || !await this.tasks.queryInstallComposerPackages(this.options)) process.exit(0);
 		const preparedTasks = this.tasks.prepareTasks(this.options);
 		console.log("\n");
 		this.tasks.printTaskStatuses(preparedTasks);
 		let currentTaskIndex = 0;
-		while (preparedTasks.some((task) => task.status !== "completed" && task.status !== "failed")) {
+		while (preparedTasks.some((task) => task.status !== "completed" && task.status !== "failed") && !preparedTasks.find((task) => task.status === "failed")) {
 			if (preparedTasks[currentTaskIndex].status === "pending") preparedTasks[currentTaskIndex].run();
 			if (preparedTasks[currentTaskIndex].status === "completed") currentTaskIndex++;
 			this.tasks.updateTaskStatuses(preparedTasks);

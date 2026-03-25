@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import { existsSync } from 'node:fs';
 import { AppOptions } from '../types/app-options';
 import { NpmInitTask } from '../tasks/npm-init-task';
+import { ComposerTask } from '../tasks/composer-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -27,18 +28,22 @@ export class TaskService {
         return [
             {
                 name: 'typescript-stimulus-controllers',
+                composerPackages: [],
                 npmPackages: ['@hotwired/stimulus', 'typescript'],
             },
             {
                 name: 'typescript-react-components',
+                composerPackages: ['symfony/ux-react'],
                 npmPackages: ['@types/react', 'react@18'],
             },
             {
                 name: 'tailwindcss',
+                composerPackages: ['symfonycasts/tailwind-bundle'],
                 npmPackages: [],
             },
             {
                 name: 'oxlint-oxformat',
+                composerPackages: [],
                 npmPackages: ['oxlint', 'oxfmt'],
             },
         ];
@@ -49,6 +54,10 @@ export class TaskService {
         const r = this.console.getResetSequence();
 
         const npmPackages = this.getNpmPackages(options);
+
+        if (npmPackages.length === 0) {
+            return true;
+        }
 
         console.log(`${T}  The following npm packages will be installed:\n\n  ${this.p.primary}${npmPackages.join(', ')}\n${r}`);
 
@@ -68,9 +77,52 @@ export class TaskService {
         return false;
     }
 
+    async queryInstallComposerPackages(options: AppOptions) {
+        const T = this.p.textBright;
+        const r = this.console.getResetSequence();
+
+        const composerPackages = this.getComposerPackages(options);
+
+        if (composerPackages.length === 0) {
+            return true;
+        }
+
+        console.log(`\n${T}  The following composer packages will be installed:\n\n  ${this.p.primary}${composerPackages.join(', ')}\n${r}`);
+
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+
+        const answer = await rl.question(`${T}  Are you sure? (y/N) ${r}`);
+
+        if (answer.match(/^y(es)?$/i)) {
+            return true;
+        }
+  
+        console.log(`\n  ${T}Installation cancelled. Exiting.${r}\n`);
+
+        return false;
+    }
+
     prepareTasks(options: AppOptions): BaseTask[] {
-        const npmTask = new NpmTask();
-        npmTask.npmPackages = this.getNpmPackages(options);
+        const composerPackages = this.getComposerPackages(options);
+        const npmPackages = this.getNpmPackages(options);
+        const installTasks: BaseTask[] = [];
+
+        if (composerPackages.length > 0) {
+            const composerTask = new ComposerTask();
+            composerTask.composerPackages = composerPackages;
+
+            installTasks.push(composerTask);
+        }
+
+        if (npmPackages.length > 0) {
+            const npmTask = new NpmTask();
+            npmTask.npmPackages = npmPackages;
+
+            installTasks.push(npmTask);
+        }
 
         for (const task of this.getSelectedTasks(options)) {
             // TODO: Add tasks
@@ -78,13 +130,26 @@ export class TaskService {
 
         return [
             ...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []),
-            npmTask,
+            ...installTasks,
         ];
     }
 
     shouldInitializeNpm(): boolean {
         const packagesJsonPath = resolve(process.cwd(), 'package.json');
         return !existsSync(packagesJsonPath);
+    }
+
+    getComposerPackages(options: AppOptions): string[] {
+        const selectedTasks = this.getSelectedTasks(options);
+        const composerPackages: string[] = [];
+
+        selectedTasks.forEach(task => {
+            if (task) {
+                composerPackages.push(...task.composerPackages);
+            }
+        });
+
+        return composerPackages.filter((pkg, index) => composerPackages.indexOf(pkg) === index);
     }
 
     getNpmPackages(options: AppOptions): string[] {

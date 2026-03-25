@@ -121,7 +121,7 @@ export class Application {
     }
 
     private async runTasks() {
-        if (!await this.tasks.queryInstallNpmPackages(this.options)) {
+        if (!await this.tasks.queryInstallNpmPackages(this.options) || !await this.tasks.queryInstallComposerPackages(this.options)) {
             process.exit(0);
         }
 
@@ -132,7 +132,7 @@ export class Application {
 
         let currentTaskIndex = 0;
 
-        while (preparedTasks.some(task => task.status !== 'completed' && task.status !== 'failed')) {
+        while (preparedTasks.some(task => task.status !== 'completed' && task.status !== 'failed') && !preparedTasks.find(task => task.status === 'failed')) {
             if (preparedTasks[currentTaskIndex].status === 'pending') {
                 preparedTasks[currentTaskIndex].run();
             }
