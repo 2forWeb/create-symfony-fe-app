@@ -75,7 +75,7 @@ export class TaskService {
         if (answer.match(/^y(es)?$/i)) {
             return true;
         }
-  
+
         console.log(`\n  ${T}Installation cancelled. Exiting.${r}\n`);
 
         return false;
@@ -91,7 +91,9 @@ export class TaskService {
             return true;
         }
 
-        console.log(`\n${T}  The following composer packages will be installed:\n\n  ${this.p.primary}${composerPackages.join(', ')}\n${r}`);
+        console.log(
+            `\n${T}  The following composer packages will be installed:\n\n  ${this.p.primary}${composerPackages.join(', ')}\n${r}`
+        );
 
         const rl = readline.createInterface({
             input: process.stdin,
@@ -103,7 +105,7 @@ export class TaskService {
         if (answer.match(/^y(es)?$/i)) {
             return true;
         }
-  
+
         console.log(`\n  ${T}Installation cancelled. Exiting.${r}\n`);
 
         return false;
@@ -133,11 +135,7 @@ export class TaskService {
             mutateTasks.push(...task.tasks);
         }
 
-        return [
-            ...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []),
-            ...installTasks,
-            ...mutateTasks,
-        ];
+        return [...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []), ...installTasks, ...mutateTasks];
     }
 
     shouldInitializeNpm(): boolean {
@@ -149,7 +147,7 @@ export class TaskService {
         const selectedTasks = this.getSelectedTasks(options);
         const composerPackages: string[] = [];
 
-        selectedTasks.forEach(task => {
+        selectedTasks.forEach((task) => {
             if (task) {
                 composerPackages.push(...task.composerPackages);
             }
@@ -162,7 +160,7 @@ export class TaskService {
         const selectedTasks = this.getSelectedTasks(options);
         const npmPackages: string[] = ['vite', 'vite-plugin-static-copy'];
 
-        selectedTasks.forEach(task => {
+        selectedTasks.forEach((task) => {
             if (task) {
                 npmPackages.push(...task.npmPackages);
             }
@@ -175,8 +173,8 @@ export class TaskService {
         const taskData = this.getTasks();
 
         return options
-            .filter(option => option.selected)
-            .map(option => taskData.find((task) => task.name === option.taskId)) as Task[];
+            .filter((option) => option.selected)
+            .map((option) => taskData.find((task) => task.name === option.taskId)) as Task[];
     }
 
     getSpinnerFrame() {

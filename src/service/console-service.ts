@@ -1,7 +1,7 @@
 import type { ColorPalette, RgbColor } from '../types/color';
 
 export class ConsoleService {
-    printRgbColor(fgColor: RgbColor, bgColor: RgbColor | null, message: string ) {
+    printRgbColor(fgColor: RgbColor, bgColor: RgbColor | null, message: string) {
         const fgColorCode = this.getRgbColor(fgColor);
         const bgColorCode = bgColor ? this.getRgbColor(bgColor, true) : '';
         const resetCode = this.getResetSequence();
@@ -16,9 +16,7 @@ export class ConsoleService {
     }
 
     getRgbColor(color: RgbColor, background: boolean = false): string {
-        return background ?
-            `\x1b[48;2;${color.r};${color.g};${color.b}m` :
-            `\x1b[38;2;${color.r};${color.g};${color.b}m`;
+        return background ? `\x1b[48;2;${color.r};${color.g};${color.b}m` : `\x1b[38;2;${color.r};${color.g};${color.b}m`;
     }
 
     getHexColor(hex: string, background: boolean = false): string {

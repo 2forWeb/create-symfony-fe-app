@@ -6,7 +6,7 @@ import * as readline from 'node:readline';
 import { TaskService } from './service/task-service';
 
 export class Application {
-    console: ConsoleService
+    console: ConsoleService;
 
     version: string;
 
@@ -39,7 +39,9 @@ export class Application {
 
         this.console.printFormattedRgbColor(t, null, '  Choose the components you want to add to your symfony application:\n');
 
-        console.log(`${t}  Use ${s}↑${t} and ${s}↓${t} to navigate, ${s}Space${t} to select/deselect, and ${s}Enter${t} to confirm your choices.\n${r}`);
+        console.log(
+            `${t}  Use ${s}↑${t} and ${s}↓${t} to navigate, ${s}Space${t} to select/deselect, and ${s}Enter${t} to confirm your choices.\n${r}`
+        );
     }
 
     printOptions() {
@@ -51,7 +53,9 @@ export class Application {
 
         this.options.forEach((option, index) => {
             const isSelectedIndex = this.selectedIndex === index;
-            console.log(`${T}  [${isSelectedIndex ? bg : ''}${option.selected ? (isSelectedIndex ? T : t) + '■' + T : ' '}${r}${T}] ${p}${option.name}`);
+            console.log(
+                `${T}  [${isSelectedIndex ? bg : ''}${option.selected ? (isSelectedIndex ? T : t) + '■' + T : ' '}${r}${T}] ${p}${option.name}`
+            );
         });
 
         console.log('');
@@ -88,7 +92,7 @@ export class Application {
                 process.stdin.setRawMode(false);
                 process.stdin.removeAllListeners('keypress');
 
-                if (!this.options.some(option => option.selected)) {
+                if (!this.options.some((option) => option.selected)) {
                     this.noOptionsExit();
                 }
 
@@ -107,7 +111,7 @@ export class Application {
     private noOptionsExit() {
         const T = this.p.textBright;
         const r = this.console.getResetSequence();
-        
+
         console.log(`\n  ${T}You've selected no options. Exiting.${r}\n`);
         process.exit(0);
     }
@@ -120,7 +124,10 @@ export class Application {
     }
 
     private async runTasks() {
-        if (!await this.tasks.queryInstallNpmPackages(this.options) || !await this.tasks.queryInstallComposerPackages(this.options)) {
+        if (
+            !(await this.tasks.queryInstallNpmPackages(this.options)) ||
+            !(await this.tasks.queryInstallComposerPackages(this.options))
+        ) {
             process.exit(0);
         }
 
@@ -131,7 +138,10 @@ export class Application {
 
         let currentTaskIndex = 0;
 
-        while (preparedTasks.some(task => task.status !== 'completed' && task.status !== 'failed') && !preparedTasks.find(task => task.status === 'failed')) {
+        while (
+            preparedTasks.some((task) => task.status !== 'completed' && task.status !== 'failed') &&
+            !preparedTasks.find((task) => task.status === 'failed')
+        ) {
             if (preparedTasks[currentTaskIndex].status === 'pending') {
                 preparedTasks[currentTaskIndex].run();
             }
@@ -142,16 +152,16 @@ export class Application {
 
             this.tasks.updateTaskStatuses(preparedTasks);
 
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         this.tasks.updateTaskStatuses(preparedTasks);
 
-        if (preparedTasks.some(task => task.status === 'failed')) {
+        if (preparedTasks.some((task) => task.status === 'failed')) {
             const E = this.p.danger;
             const r = this.console.getResetSequence();
 
-            const errorMessage = preparedTasks.find(task => task.status === 'failed')?.errorMessage || 'An error occurred';
+            const errorMessage = preparedTasks.find((task) => task.status === 'failed')?.errorMessage || 'An error occurred';
 
             console.log(`\n  ${E}Error: ${errorMessage}${r}\n\n`);
         } else {
