@@ -4,7 +4,6 @@ import { AppOptions } from './types/app-options';
 import { ColorPalette } from './types/color';
 import * as readline from 'node:readline';
 import { TaskService } from './service/task-service';
-import { Task } from './types/task';
 
 export class Application {
     console: ConsoleService

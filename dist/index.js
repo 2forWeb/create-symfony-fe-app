@@ -166,22 +166,26 @@ var TaskService = class {
 			{
 				name: "typescript-stimulus-controllers",
 				composerPackages: [],
-				npmPackages: ["@hotwired/stimulus", "typescript"]
+				npmPackages: ["@hotwired/stimulus", "typescript"],
+				tasks: []
 			},
 			{
 				name: "typescript-react-components",
 				composerPackages: ["symfony/ux-react"],
-				npmPackages: ["@types/react", "react@18"]
+				npmPackages: ["@types/react", "react@18"],
+				tasks: []
 			},
 			{
 				name: "tailwindcss",
 				composerPackages: ["symfonycasts/tailwind-bundle"],
-				npmPackages: []
+				npmPackages: [],
+				tasks: []
 			},
 			{
 				name: "oxlint-oxformat",
 				composerPackages: [],
-				npmPackages: ["oxlint", "oxfmt"]
+				npmPackages: ["oxlint", "oxfmt"],
+				tasks: []
 			}
 		];
 	}
@@ -225,8 +229,13 @@ var TaskService = class {
 			npmTask.npmPackages = npmPackages;
 			installTasks.push(npmTask);
 		}
-		for (const task of this.getSelectedTasks(options));
-		return [...this.shouldInitializeNpm() ? [new NpmInitTask()] : [], ...installTasks];
+		const mutateTasks = [];
+		for (const task of this.getSelectedTasks(options)) mutateTasks.push(...task.tasks);
+		return [
+			...this.shouldInitializeNpm() ? [new NpmInitTask()] : [],
+			...installTasks,
+			...mutateTasks
+		];
 	}
 	shouldInitializeNpm() {
 		return !(0, node_fs.existsSync)((0, path.resolve)(process.cwd(), "package.json"));

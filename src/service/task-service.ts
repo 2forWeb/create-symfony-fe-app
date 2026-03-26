@@ -30,21 +30,25 @@ export class TaskService {
                 name: 'typescript-stimulus-controllers',
                 composerPackages: [],
                 npmPackages: ['@hotwired/stimulus', 'typescript'],
+                tasks: [],
             },
             {
                 name: 'typescript-react-components',
                 composerPackages: ['symfony/ux-react'],
                 npmPackages: ['@types/react', 'react@18'],
+                tasks: [],
             },
             {
                 name: 'tailwindcss',
                 composerPackages: ['symfonycasts/tailwind-bundle'],
                 npmPackages: [],
+                tasks: [],
             },
             {
                 name: 'oxlint-oxformat',
                 composerPackages: [],
                 npmPackages: ['oxlint', 'oxfmt'],
+                tasks: [],
             },
         ];
     }
@@ -124,13 +128,15 @@ export class TaskService {
             installTasks.push(npmTask);
         }
 
+        const mutateTasks = [];
         for (const task of this.getSelectedTasks(options)) {
-            // TODO: Add tasks
+            mutateTasks.push(...task.tasks);
         }
 
         return [
             ...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []),
             ...installTasks,
+            ...mutateTasks,
         ];
     }
 
