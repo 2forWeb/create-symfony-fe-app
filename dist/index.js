@@ -147,6 +147,22 @@ var ComposerTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/tasks/tailwind-init-task.ts
+var TailwindInitTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Initializing Tailwind";
+	}
+	async doRun() {
+		await new Promise((resolve, reject) => {
+			(0, node_child_process.exec)("symfony console tailwind:init", (error, _stdout, stderr) => {
+				if (error) reject(/* @__PURE__ */ new Error(`Failed to initialize Tailwind: ${stderr}`));
+				else resolve(void 0);
+			});
+		});
+	}
+};
+//#endregion
 //#region src/service/task-service.ts
 var TaskService = class {
 	constructor() {
@@ -179,7 +195,7 @@ var TaskService = class {
 				name: "tailwindcss",
 				composerPackages: ["symfonycasts/tailwind-bundle"],
 				npmPackages: [],
-				tasks: []
+				tasks: [new TailwindInitTask()]
 			},
 			{
 				name: "oxlint-oxformat",

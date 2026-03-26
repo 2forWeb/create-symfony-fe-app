@@ -10,6 +10,7 @@ import { existsSync } from 'node:fs';
 import { AppOptions } from '../types/app-options';
 import { NpmInitTask } from '../tasks/npm-init-task';
 import { ComposerTask } from '../tasks/composer-task';
+import { TailwindInitTask } from '../tasks/tailwind-init-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -42,7 +43,7 @@ export class TaskService {
                 name: 'tailwindcss',
                 composerPackages: ['symfonycasts/tailwind-bundle'],
                 npmPackages: [],
-                tasks: [],
+                tasks: [new TailwindInitTask()],
             },
             {
                 name: 'oxlint-oxformat',
