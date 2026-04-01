@@ -11,6 +11,7 @@ import { AppOptions } from '../types/app-options';
 import { NpmInitTask } from '../tasks/npm-init-task';
 import { ComposerTask } from '../tasks/composer-task';
 import { TailwindInitTask } from '../tasks/tailwind-init-task';
+import { StimulusInitTask } from '../tasks/stimulus-init-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -27,29 +28,68 @@ export class TaskService {
 
     getTasks(): Task[] {
         return [
+            /**
+             * NpmScriptTasks
+             *   "build": "npm run build:stimulus && npm run build:react",
+                 "build:stimulus": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js",
+                 "build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",
+                 "build:stimulus:watch": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch",
+                 "build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
+                 "typecheck:stimulus": "tsc --project client/controllers/tsconfig.json --noEmit",
+                 "typecheck:react": "tsc --project client/react/tsconfig.json --noEmit",
+                 "lint": "./node_modules/.bin/eslint && ./node_modules/.bin/stylelint ** /*.css"
+             */
             {
                 name: 'typescript-stimulus-controllers',
                 composerPackages: [],
                 npmPackages: ['@hotwired/stimulus', 'typescript'],
-                tasks: [],
+                tasks: [new StimulusInitTask()],
+                /**
+                 * StimulusInitTask
+                 * StimulusNpmScriptsTask
+                 * StimulusViteConfigTask
+                 * StimulusCreateSkeletonTask
+                 * StimulusGitIgnoreTask
+                 * StimulusSymfonyLocalYamlTask
+                 *  vite-stimulus:
+                        cmd: ['npm', 'run','build:stimulus:watch']
+                 */
             },
             {
                 name: 'typescript-react-components',
                 composerPackages: ['symfony/ux-react'],
                 npmPackages: ['@types/react', 'react@18'],
                 tasks: [],
+                /**
+                 * ReactInitTask
+                 * ReactNpmScriptsTask
+                 * ReactViteConfigTask
+                 * ReactCreateSkeletonTask
+                 * ReactGitIgnoreTask
+                 * ReactSymfonyLocalYamlTask
+                    vite-react:
+                        cmd: ['npm', 'run','build:react:watch']
+
+                 */
             },
             {
                 name: 'tailwindcss',
                 composerPackages: ['symfonycasts/tailwind-bundle'],
                 npmPackages: [],
                 tasks: [new TailwindInitTask()],
+                /**
+                 * TailwindFixCssTask ?
+                 */
             },
             {
                 name: 'oxlint-oxformat',
                 composerPackages: [],
                 npmPackages: ['oxlint', 'oxfmt'],
                 tasks: [],
+                /**
+                 * LintNpmScriptsTask
+                 * OxLintConfigTask
+                 */
             },
         ];
     }

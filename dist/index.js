@@ -163,6 +163,33 @@ var TailwindInitTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/tasks/stimulus-init-task.ts
+var StimulusInitTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Creating the Stimulus TypeScript environment";
+	}
+	async doRun() {
+		try {
+			await new Promise((resolve, reject) => {
+				(0, node_child_process.exec)(`cd ${process.cwd()} && mkdir -p client/controllers`, (error, _stdout, stderr) => {
+					if (error) reject(/* @__PURE__ */ new Error(`Failed to create Stimulus directory: ${stderr}`));
+					else resolve(void 0);
+				});
+			});
+			await new Promise((resolve, reject) => {
+				(0, node_child_process.exec)(`touch ${process.cwd()}/client/controllers/hello_controller.ts`, (error, _stdout, stderr) => {
+					if (error) reject(/* @__PURE__ */ new Error(`Failed to create the basic stimulus controller: ${stderr}`));
+					else resolve(void 0);
+				});
+			});
+		} catch (error) {
+			this.errorMessage = error.message;
+			throw error;
+		}
+	}
+};
+//#endregion
 //#region src/service/task-service.ts
 var TaskService = class {
 	constructor() {
@@ -179,12 +206,24 @@ var TaskService = class {
 	}
 	getTasks() {
 		return [
+			(
+			/**
+			* NpmScriptTasks
+			*   "build": "npm run build:stimulus && npm run build:react",
+			"build:stimulus": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js",
+			"build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",
+			"build:stimulus:watch": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch",
+			"build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
+			"typecheck:stimulus": "tsc --project client/controllers/tsconfig.json --noEmit",
+			"typecheck:react": "tsc --project client/react/tsconfig.json --noEmit",
+			"lint": "./node_modules/.bin/eslint && ./node_modules/.bin/stylelint ** /*.css"
+			*/
 			{
 				name: "typescript-stimulus-controllers",
 				composerPackages: [],
 				npmPackages: ["@hotwired/stimulus", "typescript"],
-				tasks: []
-			},
+				tasks: [new StimulusInitTask()]
+			}),
 			{
 				name: "typescript-react-components",
 				composerPackages: ["symfony/ux-react"],
