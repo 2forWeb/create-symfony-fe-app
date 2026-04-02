@@ -28,6 +28,7 @@ let node_readline_promises = require("node:readline/promises");
 node_readline_promises = __toESM(node_readline_promises);
 let path = require("path");
 let node_fs = require("node:fs");
+node_fs = __toESM(node_fs);
 //#region src/service/console-service.ts
 var ConsoleService = class {
 	printRgbColor(fgColor, bgColor, message) {
@@ -163,6 +164,134 @@ var TailwindInitTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/service/file-asset-service.ts
+var FileAssetService = class {
+	async generateAssets(assets) {
+		const promises = [];
+		for (const asset of assets) promises.push(new Promise((r, reject) => {
+			node_fs.default.writeFile((0, path.resolve)(process.cwd(), asset.getFilePath()), asset.getContents(), (error) => {
+				if (error) reject(error);
+				else r(void 0);
+			});
+		}));
+		await Promise.all(promises);
+	}
+};
+//#endregion
+//#region src/skeleton/base-asset.ts
+var BaseAsset = class {
+	constructor() {
+		this.name = "";
+		this.relativePath = "";
+	}
+	getFilePath() {
+		return `${this.relativePath}/${this.name}`;
+	}
+};
+//#endregion
+//#region src/skeleton/client/controllers/tsconfig_asset.ts
+var TsconfigAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "tsconfig.json";
+		this.relativePath = "client/controllers";
+	}
+	getContents() {
+		return JSON.stringify(this.getJsonContents(), null, 2);
+	}
+	getJsonContents() {
+		return {
+			compilerOptions: {
+				module: "ES2020",
+				target: "ES2020",
+				allowJs: false,
+				moduleResolution: "node",
+				declaration: false,
+				esModuleInterop: true,
+				strict: true,
+				skipLibCheck: true,
+				forceConsistentCasingInFileNames: true,
+				noImplicitAny: true,
+				removeComments: false,
+				preserveConstEnums: true,
+				baseUrl: "./",
+				outDir: "../../assets/controllers"
+			},
+			include: ["./**/*.ts"],
+			exclude: ["node_modules", "**/*.spec.ts"]
+		};
+	}
+};
+//#endregion
+//#region src/skeleton/client/controllers/hello_controller_asset.ts
+var HelloControllerAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "hello_controller.ts";
+		this.relativePath = "client/controllers";
+	}
+	getContents() {
+		return `import { Controller } from '@hotwired/stimulus';
+
+/*
+ * Delete this file once you add controllers here!
+ */
+export default class extends Controller {
+    connect() {
+        this.element.textContent = 'Hello Stimulus! Edit me in client/controllers/hello_controller.ts';
+    }
+}
+`;
+	}
+};
+//#endregion
+//#region src/skeleton/vite-stimulus-config_asset.ts
+var ViteStimulusConfigAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "vite.stimulus.config.js";
+		this.relativePath = "./";
+	}
+	getContents() {
+		return `import { defineConfig } from 'vite';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+import fg from 'fast-glob';
+
+const entries = fg.sync('client/controllers/**/*.ts');
+
+/** @type {import('vite').UserConfig} */
+export default defineConfig({
+    root: '.',
+    publicDir: false,
+
+    build: {
+        rolldownOptions: {
+            input: entries,
+            external: ['@hotwired/stimulus'],
+            tsconfig: 'client/controllers/tsconfig.json',
+            preserveEntrySignatures: 'allow-extension',
+            output: {
+                entryFileNames: '[name].js',
+            },
+        },
+        outDir: 'assets/controllers',
+    },
+
+    plugins: [
+        viteStaticCopy({
+            targets: [
+                {
+                    src: 'client/original-controllers/**/*.js',
+                    dest: '.',
+                },
+            ],
+        }),
+    ],
+});
+`;
+	}
+};
+//#endregion
 //#region src/tasks/stimulus-init-task.ts
 var StimulusInitTask = class extends BaseTask {
 	constructor(..._args) {
@@ -177,12 +306,11 @@ var StimulusInitTask = class extends BaseTask {
 					else resolve(void 0);
 				});
 			});
-			await new Promise((resolve, reject) => {
-				(0, node_child_process.exec)(`touch ${process.cwd()}/client/controllers/hello_controller.ts`, (error, _stdout, stderr) => {
-					if (error) reject(/* @__PURE__ */ new Error(`Failed to create the basic stimulus controller: ${stderr}`));
-					else resolve(void 0);
-				});
-			});
+			await new FileAssetService().generateAssets([
+				new HelloControllerAsset(),
+				new TsconfigAsset(),
+				new ViteStimulusConfigAsset()
+			]);
 		} catch (error) {
 			this.errorMessage = error.message;
 			throw error;
