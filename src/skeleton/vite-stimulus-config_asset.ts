@@ -35,6 +35,7 @@ export default defineConfig({
                 {
                     src: 'client/original-controllers/**/*.js',
                     dest: '.',
+                    rename: { stripBase: 2 },
                 },
             ],
         }),

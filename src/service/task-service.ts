@@ -208,7 +208,7 @@ export class TaskService {
 
     getNpmPackages(options: AppOptions): string[] {
         const selectedTasks = this.getSelectedTasks(options);
-        const npmPackages: string[] = ['vite', 'vite-plugin-static-copy'];
+        const npmPackages: string[] = ['vite', 'vite-plugin-static-copy', 'fast-glob'];
 
         selectedTasks.forEach((task) => {
             if (task) {

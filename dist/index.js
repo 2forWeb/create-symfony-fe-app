@@ -284,6 +284,7 @@ export default defineConfig({
                 {
                     src: 'client/original-controllers/**/*.js',
                     dest: '.',
+                    rename: { stripBase: 2 },
                 },
             ],
         }),
@@ -302,23 +303,21 @@ var StimulusInitTask = class extends BaseTask {
 	async copyOriginalControllers() {
 		const sourceRoot = (0, path.resolve)(process.cwd(), "assets/controllers");
 		const destinationRoot = (0, path.resolve)(process.cwd(), "client/original-controllers");
-		if (!node_fs.default.existsSync(sourceRoot)) return;
 		node_fs.default.mkdirSync(destinationRoot, { recursive: true });
+		if (!node_fs.default.existsSync(sourceRoot)) return;
 		const walk = (sourceDir, relativeDir = "") => {
 			const entries = node_fs.default.readdirSync(sourceDir, { withFileTypes: true });
 			for (const entry of entries) {
 				const sourcePath = (0, path.resolve)(sourceDir, entry.name);
 				const relativePath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
 				const destinationPath = (0, path.resolve)(destinationRoot, relativePath);
+				if (entry.name === ".." || entry.name === ".") continue;
 				if (entry.isDirectory()) {
-					node_fs.default.mkdirSync(destinationPath, { recursive: true });
+					node_fs.default.mkdirSync(destinationPath);
 					walk(sourcePath, relativePath);
 					continue;
 				}
-				if (entry.isFile() && entry.name.endsWith(".js")) {
-					node_fs.default.mkdirSync((0, path.resolve)(destinationPath, ".."), { recursive: true });
-					node_fs.default.copyFileSync(sourcePath, destinationPath);
-				}
+				if (entry.isFile() && entry.name.endsWith(".js")) node_fs.default.copyFileSync(sourcePath, destinationPath);
 			}
 		};
 		walk(sourceRoot);
@@ -499,7 +498,11 @@ var TaskService = class {
 	}
 	getNpmPackages(options) {
 		const selectedTasks = this.getSelectedTasks(options);
-		const npmPackages = ["vite", "vite-plugin-static-copy"];
+		const npmPackages = [
+			"vite",
+			"vite-plugin-static-copy",
+			"fast-glob"
+		];
 		selectedTasks.forEach((task) => {
 			if (task) npmPackages.push(...task.npmPackages);
 		});

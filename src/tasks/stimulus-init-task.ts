@@ -13,11 +13,11 @@ export class StimulusInitTask extends BaseTask {
         const sourceRoot = resolve(process.cwd(), 'assets/controllers');
         const destinationRoot = resolve(process.cwd(), 'client/original-controllers');
 
+        fs.mkdirSync(destinationRoot, { recursive: true });
+
         if (!fs.existsSync(sourceRoot)) {
             return;
         }
-
-        fs.mkdirSync(destinationRoot, { recursive: true });
 
         const walk = (sourceDir: string, relativeDir = ''): void => {
             const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
@@ -27,14 +27,17 @@ export class StimulusInitTask extends BaseTask {
                 const relativePath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
                 const destinationPath = resolve(destinationRoot, relativePath);
 
+                if (entry.name === '..' || entry.name === '.') {
+                    continue;
+                }
+
                 if (entry.isDirectory()) {
-                    fs.mkdirSync(destinationPath, { recursive: true });
+                    fs.mkdirSync(destinationPath);
                     walk(sourcePath, relativePath);
                     continue;
                 }
 
                 if (entry.isFile() && entry.name.endsWith('.js')) {
-                    fs.mkdirSync(resolve(destinationPath, '..'), { recursive: true });
                     fs.copyFileSync(sourcePath, destinationPath);
                 }
             }
