@@ -7,6 +7,10 @@ export class FileAssetService {
         const promises = [];
         for (const asset of assets) {
             promises.push(new Promise((r, reject) => {
+                if (asset.relativePath !== './' && !fs.existsSync(resolve(process.cwd(), asset.relativePath))) {
+                    fs.mkdirSync(resolve(process.cwd(), asset.relativePath), { recursive: true });
+                }
+       
                 fs.writeFile(resolve(process.cwd(), asset.getFilePath()), asset.getContents(), (error) => {
                     if (error) {
                         reject(error);

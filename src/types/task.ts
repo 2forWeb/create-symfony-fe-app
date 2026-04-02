@@ -5,6 +5,9 @@ export interface Task {
     npmPackages: string[];
     composerPackages: string[];
     tasks: BaseTask[];
+    npmScripts?: Record<string, string>;
+    gitIgnore?: string[];
+    symfonyLocalCommand?: Record<string, string[]>;
 }
 
 export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';

@@ -31,45 +31,44 @@ export class TaskService {
             /**
              * NpmScriptTasks
              *   "build": "npm run build:stimulus && npm run build:react",
-                 "build:stimulus": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js",
-                 "build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",
-                 "build:stimulus:watch": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch",
-                 "build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
-                 "typecheck:stimulus": "tsc --project client/controllers/tsconfig.json --noEmit",
-                 "typecheck:react": "tsc --project client/react/tsconfig.json --noEmit",
-                 "lint": "./node_modules/.bin/eslint && ./node_modules/.bin/stylelint ** /*.css"
              */
             {
                 name: 'typescript-stimulus-controllers',
                 composerPackages: [],
                 npmPackages: ['@hotwired/stimulus', 'typescript'],
                 tasks: [new StimulusInitTask()],
-                /**
-                 * StimulusInitTask
-                 * StimulusNpmScriptsTask
-                 * StimulusViteConfigTask
-                 * StimulusCreateSkeletonTask
-                 * StimulusGitIgnoreTask
-                 * StimulusSymfonyLocalYamlTask
-                 *  vite-stimulus:
-                        cmd: ['npm', 'run','build:stimulus:watch']
-                 */
+                npmScripts: {
+                    'build:stimulus': 'node ./node_modules/.bin/vite build --config vite.stimulus.config.js',
+                    'build:stimulus:watch': 'node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch',
+                    'typecheck:stimulus': 'tsc --project client/controllers/tsconfig.json --noEmit',
+                },
+                gitIgnore: [
+                    'assets/controllers',
+                ],
+                symfonyLocalCommand: {
+                    'vite-stimulus': ["cmd: ['npm', 'run','build:stimulus:watch']"],
+                },
             },
             {
                 name: 'typescript-react-components',
                 composerPackages: ['symfony/ux-react'],
                 npmPackages: ['@types/react', 'react@18'],
                 tasks: [],
+                npmScripts: {
+                    'build:react': 'node ./node_modules/.bin/vite build --config vite.react.config.js',
+                    'build:react:watch': 'node ./node_modules/.bin/vite build --config vite.react.config.js --watch',
+                    'typecheck:react': 'tsc --project client/react/tsconfig.json --noEmit',
+                },
+                gitIgnore: [
+                    'assets/react',
+                ],
+                symfonyLocalCommand: {
+                    'vite-react': ["cmd: ['npm', 'run','build:react:watch']"],
+                },
                 /**
                  * ReactInitTask
-                 * ReactNpmScriptsTask
                  * ReactViteConfigTask
                  * ReactCreateSkeletonTask
-                 * ReactGitIgnoreTask
-                 * ReactSymfonyLocalYamlTask
-                    vite-react:
-                        cmd: ['npm', 'run','build:react:watch']
-
                  */
             },
             {
@@ -86,8 +85,12 @@ export class TaskService {
                 composerPackages: [],
                 npmPackages: ['oxlint', 'oxfmt'],
                 tasks: [],
+                npmScripts: {
+                    lint: 'oxlint && npm run fmt',
+                    fmt: 'oxfmt --check',
+                    'fmt:fix': 'oxfmt',
+                },
                 /**
-                 * LintNpmScriptsTask
                  * OxLintConfigTask
                  */
             },

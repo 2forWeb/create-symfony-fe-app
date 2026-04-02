@@ -169,6 +169,7 @@ var FileAssetService = class {
 	async generateAssets(assets) {
 		const promises = [];
 		for (const asset of assets) promises.push(new Promise((r, reject) => {
+			if (asset.relativePath !== "./" && !node_fs.default.existsSync((0, path.resolve)(process.cwd(), asset.relativePath))) node_fs.default.mkdirSync((0, path.resolve)(process.cwd(), asset.relativePath), { recursive: true });
 			node_fs.default.writeFile((0, path.resolve)(process.cwd(), asset.getFilePath()), asset.getContents(), (error) => {
 				if (error) reject(error);
 				else r(void 0);
@@ -298,19 +299,41 @@ var StimulusInitTask = class extends BaseTask {
 		super(..._args);
 		this.name = "Creating the Stimulus TypeScript environment";
 	}
+	async copyOriginalControllers() {
+		const sourceRoot = (0, path.resolve)(process.cwd(), "assets/controllers");
+		const destinationRoot = (0, path.resolve)(process.cwd(), "client/original-controllers");
+		if (!node_fs.default.existsSync(sourceRoot)) return;
+		node_fs.default.mkdirSync(destinationRoot, { recursive: true });
+		const walk = (sourceDir, relativeDir = "") => {
+			const entries = node_fs.default.readdirSync(sourceDir, { withFileTypes: true });
+			for (const entry of entries) {
+				const sourcePath = (0, path.resolve)(sourceDir, entry.name);
+				const relativePath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+				const destinationPath = (0, path.resolve)(destinationRoot, relativePath);
+				if (entry.isDirectory()) {
+					node_fs.default.mkdirSync(destinationPath, { recursive: true });
+					walk(sourcePath, relativePath);
+					continue;
+				}
+				if (entry.isFile() && entry.name.endsWith(".js")) {
+					node_fs.default.mkdirSync((0, path.resolve)(destinationPath, ".."), { recursive: true });
+					node_fs.default.copyFileSync(sourcePath, destinationPath);
+				}
+			}
+		};
+		walk(sourceRoot);
+	}
 	async doRun() {
 		try {
-			await new Promise((resolve, reject) => {
-				(0, node_child_process.exec)(`cd ${process.cwd()} && mkdir -p client/controllers`, (error, _stdout, stderr) => {
-					if (error) reject(/* @__PURE__ */ new Error(`Failed to create Stimulus directory: ${stderr}`));
-					else resolve(void 0);
-				});
-			});
-			await new FileAssetService().generateAssets([
+			const assetManager = new FileAssetService();
+			const promises = [];
+			promises.push(assetManager.generateAssets([
 				new HelloControllerAsset(),
 				new TsconfigAsset(),
 				new ViteStimulusConfigAsset()
-			]);
+			]));
+			promises.push(this.copyOriginalControllers());
+			await Promise.all(promises);
 		} catch (error) {
 			this.errorMessage = error.message;
 			throw error;
@@ -338,25 +361,32 @@ var TaskService = class {
 			/**
 			* NpmScriptTasks
 			*   "build": "npm run build:stimulus && npm run build:react",
-			"build:stimulus": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js",
-			"build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",
-			"build:stimulus:watch": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch",
-			"build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
-			"typecheck:stimulus": "tsc --project client/controllers/tsconfig.json --noEmit",
-			"typecheck:react": "tsc --project client/react/tsconfig.json --noEmit",
-			"lint": "./node_modules/.bin/eslint && ./node_modules/.bin/stylelint ** /*.css"
 			*/
 			{
 				name: "typescript-stimulus-controllers",
 				composerPackages: [],
 				npmPackages: ["@hotwired/stimulus", "typescript"],
-				tasks: [new StimulusInitTask()]
+				tasks: [new StimulusInitTask()],
+				npmScripts: {
+					"build:stimulus": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js",
+					"build:stimulus:watch": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch",
+					"typecheck:stimulus": "tsc --project client/controllers/tsconfig.json --noEmit"
+				},
+				gitIgnore: ["assets/controllers"],
+				symfonyLocalCommand: { "vite-stimulus": ["cmd: ['npm', 'run','build:stimulus:watch']"] }
 			}),
 			{
 				name: "typescript-react-components",
 				composerPackages: ["symfony/ux-react"],
 				npmPackages: ["@types/react", "react@18"],
-				tasks: []
+				tasks: [],
+				npmScripts: {
+					"build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",
+					"build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
+					"typecheck:react": "tsc --project client/react/tsconfig.json --noEmit"
+				},
+				gitIgnore: ["assets/react"],
+				symfonyLocalCommand: { "vite-react": ["cmd: ['npm', 'run','build:react:watch']"] }
 			},
 			{
 				name: "tailwindcss",
@@ -368,7 +398,12 @@ var TaskService = class {
 				name: "oxlint-oxformat",
 				composerPackages: [],
 				npmPackages: ["oxlint", "oxfmt"],
-				tasks: []
+				tasks: [],
+				npmScripts: {
+					lint: "oxlint && npm run fmt",
+					fmt: "oxfmt --check",
+					"fmt:fix": "oxfmt"
+				}
 			}
 		];
 	}
