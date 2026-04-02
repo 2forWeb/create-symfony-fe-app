@@ -12,6 +12,7 @@ import { NpmInitTask } from '../tasks/npm-init-task';
 import { ComposerTask } from '../tasks/composer-task';
 import { TailwindInitTask } from '../tasks/tailwind-init-task';
 import { StimulusInitTask } from '../tasks/stimulus-init-task';
+import { NpmScriptsTask } from '../tasks/npm-scripts-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -28,10 +29,6 @@ export class TaskService {
 
     getTasks(): Task[] {
         return [
-            /**
-             * NpmScriptTasks
-             *   "build": "npm run build:stimulus && npm run build:react",
-             */
             {
                 name: 'typescript-stimulus-controllers',
                 composerPackages: [],
@@ -158,6 +155,7 @@ export class TaskService {
     prepareTasks(options: AppOptions): BaseTask[] {
         const composerPackages = this.getComposerPackages(options);
         const npmPackages = this.getNpmPackages(options);
+        const npmScripts = this.getNpmScripts(options);
         const installTasks: BaseTask[] = [];
 
         if (composerPackages.length > 0) {
@@ -179,7 +177,15 @@ export class TaskService {
             mutateTasks.push(...task.tasks);
         }
 
-        return [...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []), ...installTasks, ...mutateTasks];
+        const npmScriptsTask = new NpmScriptsTask();
+        npmScriptsTask.npmScripts = npmScripts;
+
+        return [
+            ...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []),
+            ...installTasks,
+            ...mutateTasks,
+            ...(Object.keys(npmScripts).length > 0 ? [npmScriptsTask] : []),
+        ];
     }
 
     shouldInitializeNpm(): boolean {
@@ -211,6 +217,19 @@ export class TaskService {
         });
 
         return npmPackages.filter((pkg, index) => npmPackages.indexOf(pkg) === index);
+    }
+
+    getNpmScripts(options: AppOptions): Record<string, string> {
+        const selectedTasks = this.getSelectedTasks(options);
+        let npmScripts: Record<string, string> = {};
+
+        selectedTasks.forEach((task) => {
+            if (task.npmScripts) {
+                npmScripts = { ...npmScripts, ...task.npmScripts };
+            }
+        });
+
+        return npmScripts;
     }
 
     getSelectedTasks(options: AppOptions): Task[] {

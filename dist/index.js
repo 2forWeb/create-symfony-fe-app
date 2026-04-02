@@ -341,6 +341,38 @@ var StimulusInitTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/tasks/npm-scripts-task.ts
+var NpmScriptsTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Adding NPM scripts to package.json";
+	}
+	async doRun() {
+		return new Promise((r, reject) => {
+			if (!this.npmScripts) r(void 0);
+			const packageJsonPath = (0, path.resolve)(process.cwd(), "package.json");
+			if (!node_fs.default.existsSync(packageJsonPath)) throw new Error(`Could not find package.json in ${process.cwd()}`);
+			node_fs.default.readFile(packageJsonPath, "utf-8", (err, data) => {
+				if (err) reject(/* @__PURE__ */ new Error(`Failed to read package.json: ${err.message}`));
+				else {
+					const packageJson = JSON.parse(data);
+					packageJson.scripts ??= {};
+					for (const [scriptName, scriptValue] of Object.entries(this.npmScripts ?? {})) packageJson.scripts[scriptName] = scriptValue;
+					const scriptNames = Object.keys(this.npmScripts ?? {});
+					const buildStimulusScript = scriptNames.includes("build:stimulus") ? "npm run build:stimulus" : "";
+					const buildReactScript = scriptNames.includes("build:react") ? "npm run build:react" : "";
+					const connector = buildStimulusScript && buildReactScript ? " && " : "";
+					packageJson.scripts["build"] = `${buildStimulusScript} ${connector} ${buildReactScript}`.trim();
+					node_fs.default.writeFile(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, (err) => {
+						if (err) reject(/* @__PURE__ */ new Error(`Failed to write package.json: ${err.message}`));
+						else r(void 0);
+					});
+				}
+			});
+		});
+	}
+};
+//#endregion
 //#region src/service/task-service.ts
 var TaskService = class {
 	constructor() {
@@ -357,11 +389,6 @@ var TaskService = class {
 	}
 	getTasks() {
 		return [
-			(
-			/**
-			* NpmScriptTasks
-			*   "build": "npm run build:stimulus && npm run build:react",
-			*/
 			{
 				name: "typescript-stimulus-controllers",
 				composerPackages: [],
@@ -374,7 +401,7 @@ var TaskService = class {
 				},
 				gitIgnore: ["assets/controllers"],
 				symfonyLocalCommand: { "vite-stimulus": ["cmd: ['npm', 'run','build:stimulus:watch']"] }
-			}),
+			},
 			{
 				name: "typescript-react-components",
 				composerPackages: ["symfony/ux-react"],
@@ -436,6 +463,7 @@ var TaskService = class {
 	prepareTasks(options) {
 		const composerPackages = this.getComposerPackages(options);
 		const npmPackages = this.getNpmPackages(options);
+		const npmScripts = this.getNpmScripts(options);
 		const installTasks = [];
 		if (composerPackages.length > 0) {
 			const composerTask = new ComposerTask();
@@ -449,10 +477,13 @@ var TaskService = class {
 		}
 		const mutateTasks = [];
 		for (const task of this.getSelectedTasks(options)) mutateTasks.push(...task.tasks);
+		const npmScriptsTask = new NpmScriptsTask();
+		npmScriptsTask.npmScripts = npmScripts;
 		return [
 			...this.shouldInitializeNpm() ? [new NpmInitTask()] : [],
 			...installTasks,
-			...mutateTasks
+			...mutateTasks,
+			...Object.keys(npmScripts).length > 0 ? [npmScriptsTask] : []
 		];
 	}
 	shouldInitializeNpm() {
@@ -473,6 +504,17 @@ var TaskService = class {
 			if (task) npmPackages.push(...task.npmPackages);
 		});
 		return npmPackages.filter((pkg, index) => npmPackages.indexOf(pkg) === index);
+	}
+	getNpmScripts(options) {
+		const selectedTasks = this.getSelectedTasks(options);
+		let npmScripts = {};
+		selectedTasks.forEach((task) => {
+			if (task.npmScripts) npmScripts = {
+				...npmScripts,
+				...task.npmScripts
+			};
+		});
+		return npmScripts;
 	}
 	getSelectedTasks(options) {
 		const taskData = this.getTasks();
