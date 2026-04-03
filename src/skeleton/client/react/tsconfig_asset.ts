@@ -14,7 +14,7 @@ export class TsconfigAsset extends BaseAsset {
                 module: 'ES2020',
                 target: 'ES2020',
                 allowJs: false,
-                moduleResolution: 'node',
+                moduleResolution: 'bundler',
                 declaration: false,
                 esModuleInterop: true,
                 noEmit: true,
@@ -24,9 +24,8 @@ export class TsconfigAsset extends BaseAsset {
                 noImplicitAny: true,
                 removeComments: false,
                 preserveConstEnums: true,
-                baseUrl: './',
             },
-            include: ['./**/*.ts'],
+            include: ['./**/*.tsx'],
             exclude: ['node_modules', '**/*.spec.ts'],
         };
     }

@@ -207,7 +207,7 @@ var TsconfigAsset = class extends BaseAsset {
 				target: "ES2020",
 				allowJs: false,
 				noEmit: true,
-				moduleResolution: "node",
+				moduleResolution: "bundler",
 				declaration: false,
 				esModuleInterop: true,
 				strict: true,
@@ -216,10 +216,9 @@ var TsconfigAsset = class extends BaseAsset {
 				noImplicitAny: true,
 				removeComments: false,
 				preserveConstEnums: true,
-				baseUrl: "./",
 				jsx: "react"
 			},
-			include: ["./**/*.tsx"],
+			include: ["./**/*.ts"],
 			exclude: ["node_modules", "**/*.spec.ts"]
 		};
 	}
