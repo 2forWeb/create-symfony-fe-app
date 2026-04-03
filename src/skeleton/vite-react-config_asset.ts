@@ -1,6 +1,6 @@
 import { BaseAsset } from './base-asset';
 
-export class ViteStimulusConfigAsset extends BaseAsset {
+export class ViteReactConfigAsset extends BaseAsset {
     name = 'vite.stimulus.config.js';
     relativePath = './';
 

@@ -191,7 +191,7 @@ var BaseAsset = class {
 };
 //#endregion
 //#region src/skeleton/client/controllers/tsconfig_asset.ts
-var TsconfigAsset = class extends BaseAsset {
+var TsconfigAsset$1 = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
 		this.name = "tsconfig.json";
@@ -328,7 +328,7 @@ var StimulusInitTask = class extends BaseTask {
 			const promises = [];
 			promises.push(assetManager.generateAssets([
 				new HelloControllerAsset(),
-				new TsconfigAsset(),
+				new TsconfigAsset$1(),
 				new ViteStimulusConfigAsset()
 			]));
 			promises.push(this.copyOriginalControllers());
@@ -502,6 +502,111 @@ var OxLintInitTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/skeleton/client/react/tsconfig_asset.ts
+var TsconfigAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "tsconfig.json";
+		this.relativePath = "client/react";
+	}
+	getContents() {
+		return JSON.stringify(this.getJsonContents(), null, 2);
+	}
+	getJsonContents() {
+		return {
+			compilerOptions: {
+				module: "ES2020",
+				target: "ES2020",
+				allowJs: false,
+				moduleResolution: "bundler",
+				declaration: false,
+				esModuleInterop: true,
+				noEmit: true,
+				strict: true,
+				skipLibCheck: true,
+				forceConsistentCasingInFileNames: true,
+				noImplicitAny: true,
+				removeComments: false,
+				preserveConstEnums: true
+			},
+			include: ["./**/*.tsx"],
+			exclude: ["node_modules", "**/*.spec.ts"]
+		};
+	}
+};
+//#endregion
+//#region src/skeleton/client/react/hello_asset.ts
+var HelloAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Hello.ts";
+		this.relativePath = "client/react";
+	}
+	getContents() {
+		return `import React from 'react';
+
+export default function Hello() {
+    return <h1>Hello World!</h1>;
+}
+`;
+	}
+};
+//#endregion
+//#region src/skeleton/vite-react-config_asset.ts
+var ViteReactConfigAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "vite.stimulus.config.js";
+		this.relativePath = "./";
+	}
+	getContents() {
+		return `import { defineConfig } from 'vite';
+import fg from 'fast-glob';
+
+const entries = fg.sync('client/react/**/*.tsx');
+
+export default defineConfig({
+    root: '.',
+    publicDir: false,
+
+    build: {
+        rolldownOptions: {
+            input: entries,
+            external: ['react'],
+            tsconfig: 'client/react/tsconfig.json',
+            preserveEntrySignatures: 'allow-extension',
+            output: {
+                entryFileNames: '[name].js',
+            },
+            treeshake: false,
+        },
+        outDir: 'assets/react/controllers',
+    },
+});
+`;
+	}
+};
+//#endregion
+//#region src/tasks/react-init-task.ts
+var ReactInitTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Creating the React TypeScript environment";
+	}
+	async doRun() {
+		try {
+			await new FileAssetService().generateAssets([
+				new HelloAsset(),
+				new TsconfigAsset(),
+				new ViteReactConfigAsset()
+			]);
+		} catch (error) {
+			this.errorMessage = error.message;
+			throw error;
+		}
+	}
+};
+//#endregion
 //#region src/service/task-service.ts
 var TaskService = class {
 	constructor() {
@@ -535,7 +640,7 @@ var TaskService = class {
 				name: "typescript-react-components",
 				composerPackages: ["symfony/ux-react"],
 				npmPackages: ["@types/react", "react@18"],
-				tasks: [],
+				tasks: [new ReactInitTask()],
 				npmScripts: {
 					"build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",
 					"build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
@@ -659,7 +764,7 @@ var TaskService = class {
 	}
 	getGitIgnoreStatements(options) {
 		const selectedTasks = this.getSelectedTasks(options);
-		const gitIgnoreStatements = [];
+		const gitIgnoreStatements = ["node_modules"];
 		selectedTasks.forEach((task) => {
 			if (task.gitIgnore) gitIgnoreStatements.push(...task.gitIgnore);
 		});

@@ -16,6 +16,7 @@ import { NpmScriptsTask } from '../tasks/npm-scripts-task';
 import { GitIgnoreTask } from '../tasks/git-ignore-task';
 import { SymfonyLocalCommandsTask } from '../tasks/symfony-local-commands-task';
 import { OxLintInitTask } from '../tasks/oxlint-init-task';
+import { ReactInitTask } from '../tasks/react-init-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -51,7 +52,7 @@ export class TaskService {
                 name: 'typescript-react-components',
                 composerPackages: ['symfony/ux-react'],
                 npmPackages: ['@types/react', 'react@18'],
-                tasks: [],
+                tasks: [new ReactInitTask()],
                 npmScripts: {
                     'build:react': 'node ./node_modules/.bin/vite build --config vite.react.config.js',
                     'build:react:watch': 'node ./node_modules/.bin/vite build --config vite.react.config.js --watch',
@@ -61,20 +62,12 @@ export class TaskService {
                 symfonyLocalCommand: {
                     'vite-react': ["cmd: ['npm', 'run','build:react:watch']"],
                 },
-                /**
-                 * ReactInitTask
-                 * ReactViteConfigTask
-                 * ReactCreateSkeletonTask
-                 */
             },
             {
                 name: 'tailwindcss',
                 composerPackages: ['symfonycasts/tailwind-bundle'],
                 npmPackages: [],
                 tasks: [new TailwindInitTask()],
-                /**
-                 * TailwindFixCssTask ?
-                 */
             },
             {
                 name: 'oxlint-oxformat',
@@ -247,7 +240,7 @@ export class TaskService {
 
     getGitIgnoreStatements(options: AppOptions): string[] {
         const selectedTasks = this.getSelectedTasks(options);
-        const gitIgnoreStatements: string[] = [];
+        const gitIgnoreStatements: string[] = ['node_modules'];
 
         selectedTasks.forEach((task) => {
             if (task.gitIgnore) {
