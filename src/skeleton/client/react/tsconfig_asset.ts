@@ -16,6 +16,7 @@ export class TsconfigAsset extends BaseAsset {
                 allowJs: false,
                 moduleResolution: 'bundler',
                 declaration: false,
+                jsx: 'react-jsx',
                 esModuleInterop: true,
                 noEmit: true,
                 strict: true,

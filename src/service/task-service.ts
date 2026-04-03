@@ -34,6 +34,15 @@ export class TaskService {
     getTasks(): Task[] {
         return [
             {
+                name: 'tailwindcss',
+                composerPackages: ['symfonycasts/tailwind-bundle'],
+                npmPackages: [],
+                tasks: [new TailwindInitTask()],
+                symfonyLocalCommand: {
+                    'tailwind': ["cmd: ['symfony', 'console', 'tailwind:build', '--watch']"],
+                },
+            },
+            {
                 name: 'typescript-stimulus-controllers',
                 composerPackages: [],
                 npmPackages: ['@hotwired/stimulus', 'typescript'],
@@ -43,9 +52,9 @@ export class TaskService {
                     'build:stimulus:watch': 'node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch',
                     'typecheck:stimulus': 'tsc --project client/controllers/tsconfig.json --noEmit',
                 },
-                gitIgnore: ['assets/controllers'],
+                gitIgnore: ['/assets/controllers/'],
                 symfonyLocalCommand: {
-                    'vite-stimulus': ["cmd: ['npm', 'run','build:stimulus:watch']"],
+                    'vite-stimulus': ["cmd: ['npm', 'run', 'build:stimulus:watch']"],
                 },
             },
             {
@@ -58,16 +67,10 @@ export class TaskService {
                     'build:react:watch': 'node ./node_modules/.bin/vite build --config vite.react.config.js --watch',
                     'typecheck:react': 'tsc --project client/react/tsconfig.json --noEmit',
                 },
-                gitIgnore: ['assets/react'],
+                gitIgnore: ['/assets/react/'],
                 symfonyLocalCommand: {
-                    'vite-react': ["cmd: ['npm', 'run','build:react:watch']"],
+                    'vite-react': ["cmd: ['npm', 'run', 'build:react:watch']"],
                 },
-            },
-            {
-                name: 'tailwindcss',
-                composerPackages: ['symfonycasts/tailwind-bundle'],
-                npmPackages: [],
-                tasks: [new TailwindInitTask()],
             },
             {
                 name: 'oxlint-oxformat',
@@ -240,7 +243,7 @@ export class TaskService {
 
     getGitIgnoreStatements(options: AppOptions): string[] {
         const selectedTasks = this.getSelectedTasks(options);
-        const gitIgnoreStatements: string[] = ['node_modules'];
+        const gitIgnoreStatements: string[] = [];
 
         selectedTasks.forEach((task) => {
             if (task.gitIgnore) {

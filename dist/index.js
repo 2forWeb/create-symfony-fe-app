@@ -158,7 +158,10 @@ var TailwindInitTask = class extends BaseTask {
 		await new Promise((resolve, reject) => {
 			(0, node_child_process.exec)("symfony console tailwind:init", (error, _stdout, stderr) => {
 				if (error) reject(/* @__PURE__ */ new Error(`Failed to initialize Tailwind: ${stderr}`));
-				else resolve(void 0);
+				else {
+					node_fs.default.writeFileSync("assets/styles/app.css", node_fs.default.readFileSync("assets/styles/app.css").toString().replace(/import "tailwindcss"/g, "import 'tailwindcss'"));
+					resolve(void 0);
+				}
 			});
 		});
 	}
@@ -520,6 +523,7 @@ var TsconfigAsset = class extends BaseAsset {
 				allowJs: false,
 				moduleResolution: "bundler",
 				declaration: false,
+				jsx: "react-jsx",
 				esModuleInterop: true,
 				noEmit: true,
 				strict: true,
@@ -624,6 +628,13 @@ var TaskService = class {
 	getTasks() {
 		return [
 			{
+				name: "tailwindcss",
+				composerPackages: ["symfonycasts/tailwind-bundle"],
+				npmPackages: [],
+				tasks: [new TailwindInitTask()],
+				symfonyLocalCommand: { "tailwind": ["cmd: ['symfony', 'console', 'tailwind:build', '--watch']"] }
+			},
+			{
 				name: "typescript-stimulus-controllers",
 				composerPackages: [],
 				npmPackages: ["@hotwired/stimulus", "typescript"],
@@ -633,8 +644,8 @@ var TaskService = class {
 					"build:stimulus:watch": "node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch",
 					"typecheck:stimulus": "tsc --project client/controllers/tsconfig.json --noEmit"
 				},
-				gitIgnore: ["assets/controllers"],
-				symfonyLocalCommand: { "vite-stimulus": ["cmd: ['npm', 'run','build:stimulus:watch']"] }
+				gitIgnore: ["/assets/controllers/"],
+				symfonyLocalCommand: { "vite-stimulus": ["cmd: ['npm', 'run', 'build:stimulus:watch']"] }
 			},
 			{
 				name: "typescript-react-components",
@@ -646,14 +657,8 @@ var TaskService = class {
 					"build:react:watch": "node ./node_modules/.bin/vite build --config vite.react.config.js --watch",
 					"typecheck:react": "tsc --project client/react/tsconfig.json --noEmit"
 				},
-				gitIgnore: ["assets/react"],
-				symfonyLocalCommand: { "vite-react": ["cmd: ['npm', 'run','build:react:watch']"] }
-			},
-			{
-				name: "tailwindcss",
-				composerPackages: ["symfonycasts/tailwind-bundle"],
-				npmPackages: [],
-				tasks: [new TailwindInitTask()]
+				gitIgnore: ["/assets/react/"],
+				symfonyLocalCommand: { "vite-react": ["cmd: ['npm', 'run', 'build:react:watch']"] }
 			},
 			{
 				name: "oxlint-oxformat",
@@ -764,7 +769,7 @@ var TaskService = class {
 	}
 	getGitIgnoreStatements(options) {
 		const selectedTasks = this.getSelectedTasks(options);
-		const gitIgnoreStatements = ["node_modules"];
+		const gitIgnoreStatements = [];
 		selectedTasks.forEach((task) => {
 			if (task.gitIgnore) gitIgnoreStatements.push(...task.gitIgnore);
 		});
