@@ -481,15 +481,7 @@ var OxfmtRcAsset = class extends BaseAsset {
 			tabWidth: 4,
 			trailingComma: "es5",
 			semi: true,
-			singleQuote: true,
-			ignorePatterns: [
-				"**",
-				"!client/",
-				"!client/**/*.ts",
-				"!client/**/*.tsx",
-				"!assets/",
-				"!assets/styles/**/*.css"
-			]
+			singleQuote: true
 		};
 	}
 };
@@ -565,8 +557,8 @@ var TaskService = class {
 				tasks: [new OxLintInitTask()],
 				npmScripts: {
 					lint: "oxlint && npm run fmt",
-					fmt: "oxfmt --check",
-					"fmt:fix": "oxfmt"
+					fmt: "oxfmt --check client/**/*.ts client/**/*.tsx assets/styles/**/*.css",
+					"fmt:fix": "oxfmt client/**/*.ts client/**/*.tsx assets/styles/**/*.css"
 				}
 			}
 		];

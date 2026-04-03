@@ -83,8 +83,8 @@ export class TaskService {
                 tasks: [new OxLintInitTask()],
                 npmScripts: {
                     lint: 'oxlint && npm run fmt',
-                    fmt: 'oxfmt --check',
-                    'fmt:fix': 'oxfmt',
+                    fmt: 'oxfmt --check client/**/*.ts client/**/*.tsx assets/styles/**/*.css',
+                    'fmt:fix': 'oxfmt client/**/*.ts client/**/*.tsx assets/styles/**/*.css',
                 },
             },
         ];

@@ -17,7 +17,6 @@ export class OxfmtRcAsset extends BaseAsset {
             trailingComma: 'es5',
             semi: true,
             singleQuote: true,
-            ignorePatterns: ['**', '!client/', '!client/**/*.ts', '!client/**/*.tsx', '!assets/','!assets/styles/**/*.css'],
         };
     }
 }
