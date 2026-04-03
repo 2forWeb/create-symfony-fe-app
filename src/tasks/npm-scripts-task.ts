@@ -11,6 +11,7 @@ export class NpmScriptsTask extends BaseTask {
         return new Promise((r, reject) => {
             if (!this.npmScripts) {
                 r(undefined);
+                return;
             }
 
             const packageJsonPath = resolve(process.cwd(), 'package.json');

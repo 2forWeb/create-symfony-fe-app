@@ -13,6 +13,8 @@ import { ComposerTask } from '../tasks/composer-task';
 import { TailwindInitTask } from '../tasks/tailwind-init-task';
 import { StimulusInitTask } from '../tasks/stimulus-init-task';
 import { NpmScriptsTask } from '../tasks/npm-scripts-task';
+import { GitIgnoreTask } from '../tasks/git-ignore-task';
+import { SymfonyLocalCommandsTask } from '../tasks/symfony-local-commands-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -156,6 +158,9 @@ export class TaskService {
         const composerPackages = this.getComposerPackages(options);
         const npmPackages = this.getNpmPackages(options);
         const npmScripts = this.getNpmScripts(options);
+        const gitIgnoreStatements = this.getGitIgnoreStatements(options);
+        const symfonyLocalCommands = this.getSymfonyLocalCommands(options);
+
         const installTasks: BaseTask[] = [];
 
         if (composerPackages.length > 0) {
@@ -177,14 +182,28 @@ export class TaskService {
             mutateTasks.push(...task.tasks);
         }
 
-        const npmScriptsTask = new NpmScriptsTask();
-        npmScriptsTask.npmScripts = npmScripts;
+        const npmScriptsTask = Object.keys(npmScripts).length > 0 ? new NpmScriptsTask() : null;
+        if (npmScriptsTask) {
+            npmScriptsTask.npmScripts = npmScripts;
+        }
+
+        const gitIgnoreTask = gitIgnoreStatements.length > 0 ? new GitIgnoreTask() : null;
+        if (gitIgnoreTask) {
+            gitIgnoreTask.gitIgnore = gitIgnoreStatements;
+        }
+
+        const symfonyLocalCommandsTask = Object.keys(symfonyLocalCommands).length > 0 ? new SymfonyLocalCommandsTask() : null;
+        if (symfonyLocalCommandsTask) {
+            symfonyLocalCommandsTask.symfonyLocalCommands = symfonyLocalCommands;
+        }
 
         return [
             ...(this.shouldInitializeNpm() ? [new NpmInitTask()] : []),
             ...installTasks,
             ...mutateTasks,
-            ...(Object.keys(npmScripts).length > 0 ? [npmScriptsTask] : []),
+            ...(npmScriptsTask ? [npmScriptsTask] : []),
+            ...(gitIgnoreTask ? [gitIgnoreTask] : []),
+            ...(symfonyLocalCommandsTask ? [symfonyLocalCommandsTask] : []),
         ];
     }
 
@@ -230,6 +249,32 @@ export class TaskService {
         });
 
         return npmScripts;
+    }
+
+    getGitIgnoreStatements(options: AppOptions): string[] {
+        const selectedTasks = this.getSelectedTasks(options);
+        const gitIgnoreStatements: string[] = [];
+
+        selectedTasks.forEach((task) => {
+            if (task.gitIgnore) {
+                gitIgnoreStatements.push(...task.gitIgnore);
+            }
+        });
+
+        return gitIgnoreStatements;
+    }
+
+    getSymfonyLocalCommands(options: AppOptions): Record<string, string[]> {
+        const selectedTasks = this.getSelectedTasks(options);
+        let symfonyLocalCommands: Record<string, string[]> = {};
+
+        selectedTasks.forEach((task) => {
+            if (task.symfonyLocalCommand) {
+                symfonyLocalCommands = { ...symfonyLocalCommands, ...task.symfonyLocalCommand };
+            }
+        });
+
+        return symfonyLocalCommands;
     }
 
     getSelectedTasks(options: AppOptions): Task[] {
