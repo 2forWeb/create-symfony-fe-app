@@ -1,7 +1,7 @@
 import { BaseAsset } from './base-asset';
 
 export class ViteReactConfigAsset extends BaseAsset {
-    name = 'vite.stimulus.config.js';
+    name = 'vite.react.config.js';
     relativePath = './';
 
     getContents(): string {

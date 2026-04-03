@@ -556,7 +556,7 @@ export default function Hello() {
 var ViteReactConfigAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
-		this.name = "vite.stimulus.config.js";
+		this.name = "vite.react.config.js";
 		this.relativePath = "./";
 	}
 	getContents() {
