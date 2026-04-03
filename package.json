@@ -22,9 +22,9 @@
         "typecheck": "tsc --noEmit",
         "build": "node ./node_modules/.bin/vite build",
         "build:watch": "node ./node_modules/.bin/vite build --watch",
-        "lint": "oxlint 'src/**/*.{ts,tsx}'",
-        "fmt": "oxfmt --check",
-        "fmt:fix": "oxfmt",
+        "lint": "oxlint src/**/*.ts",
+        "fmt": "oxfmt --check src/**/*.ts",
+        "fmt:fix": "oxfmt src/**/*.ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "devDependencies": {
