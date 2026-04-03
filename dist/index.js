@@ -830,19 +830,53 @@ var TaskService = class {
 var Application = class {
 	constructor() {
 		this.selectedIndex = 0;
+		this.noInteractive = false;
 		this.version = new VersionService().getVersion();
 		this.console = new ConsoleService();
 		this.p = this.console.getPalette();
 		this.options = this.getDefaultOptions();
 		this.tasks = new TaskService();
 	}
+	parseParameters() {
+		const d = this.p.danger;
+		const r = this.console.getResetSequence();
+		const args = process.argv.slice(2);
+		const optionsArgs = this.options.map((option) => option.argName);
+		const acceptedArgs = [
+			"--no-interactive",
+			"-y",
+			...optionsArgs
+		];
+		const invalidArgs = args.filter((arg) => !acceptedArgs.includes(arg));
+		if (invalidArgs.length > 0) {
+			console.log(`\n  ${d}Error: Unrecognized argument(s) ${invalidArgs.join(", ")}${r}\n`);
+			process.exit(1);
+		}
+		if (args.includes("--no-interactive") || args.includes("-y")) this.noInteractive = true;
+		let cleanedUp = false;
+		args.forEach((arg) => {
+			if (optionsArgs.includes(arg)) {
+				if (!cleanedUp) {
+					cleanedUp = true;
+					this.options.forEach((option) => {
+						option.selected = false;
+					});
+				}
+				const option = this.options.find((option) => option.argName === arg);
+				if (option) option.selected = true;
+			}
+		});
+	}
 	printWelcomeMessage() {
 		const r = this.console.getResetSequence();
-		const t = this.p.text;
 		const p = this.p.primary;
-		const s = this.p.secondary;
 		const T = this.p.textBright;
 		console.log(`\n${T}  Create Symfony FE App - Version ${p}${this.version}${r}\n`);
+	}
+	printInstructions() {
+		const t = this.p.text;
+		const s = this.p.secondary;
+		const r = this.console.getResetSequence();
 		this.console.printFormattedRgbColor(t, null, "  Choose the components you want to add to your symfony application:\n");
 		console.log(`${t}  Use ${s}↑${t} and ${s}↓${t} to navigate, ${s}Space${t} to select/deselect, and ${s}Enter${t} to confirm your choices.\n${r}`);
 	}
@@ -863,6 +897,7 @@ var Application = class {
 		this.printOptions();
 	}
 	startInputLoop() {
+		this.printOptions();
 		node_readline.emitKeypressEvents(process.stdin);
 		if (process.stdin.isTTY) process.stdin.setRawMode(true);
 		process.stdin.on("keypress", async (str, key) => {
@@ -903,7 +938,7 @@ var Application = class {
 		console.log(`  ${T}Installing client...${r}\n`);
 	}
 	async runTasks() {
-		if (!await this.tasks.queryInstallNpmPackages(this.options) || !await this.tasks.queryInstallComposerPackages(this.options)) process.exit(0);
+		if (!this.noInteractive && (!await this.tasks.queryInstallNpmPackages(this.options) || !await this.tasks.queryInstallComposerPackages(this.options))) process.exit(0);
 		const preparedTasks = this.tasks.prepareTasks(this.options);
 		console.log("\n");
 		this.tasks.printTaskStatuses(preparedTasks);
@@ -931,22 +966,26 @@ var Application = class {
 			{
 				name: "TypeScript StimulusJS Controlleres",
 				taskId: "typescript-stimulus-controllers",
-				selected: true
+				selected: true,
+				argName: "--stimulus"
 			},
 			{
 				name: "TypeScript React Components",
 				taskId: "typescript-react-components",
-				selected: false
+				selected: false,
+				argName: "--react"
 			},
 			{
 				name: "TailwindCSS",
 				taskId: "tailwindcss",
-				selected: false
+				selected: false,
+				argName: "--tailwind"
 			},
 			{
 				name: "OxLint / OxFormat",
 				taskId: "oxlint-oxformat",
-				selected: true
+				selected: true,
+				argName: "--oxlint"
 			}
 		];
 	}
@@ -955,6 +994,10 @@ var Application = class {
 //#region src/index.ts
 var app = new Application();
 app.printWelcomeMessage();
-app.printOptions();
-app.startInputLoop();
+app.parseParameters();
+if (app.noInteractive) app.runTasks();
+else {
+	app.printInstructions();
+	app.startInputLoop();
+}
 //#endregion

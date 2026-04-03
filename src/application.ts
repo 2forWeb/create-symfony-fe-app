@@ -18,6 +18,8 @@ export class Application {
 
     selectedIndex: number = 0;
 
+    noInteractive: boolean = false;
+
     constructor() {
         const versionService = new VersionService();
         this.version = versionService.getVersion();
@@ -28,14 +30,57 @@ export class Application {
         this.tasks = new TaskService();
     }
 
+    parseParameters() {
+        const d = this.p.danger;
+        const r = this.console.getResetSequence();
+
+        const args = process.argv.slice(2);
+
+        const optionsArgs = this.options.map((option) => option.argName);
+        const acceptedArgs = ['--no-interactive', '-y', ...optionsArgs];
+
+        const invalidArgs = args.filter((arg) => !acceptedArgs.includes(arg));
+
+        if (invalidArgs.length > 0) {
+            console.log(`\n  ${d}Error: Unrecognized argument(s) ${invalidArgs.join(', ')}${r}\n`);
+            process.exit(1);
+        }
+
+        if (args.includes('--no-interactive') || args.includes('-y')) {
+            this.noInteractive = true;
+        }
+
+        let cleanedUp = false;
+        args.forEach((arg) => {
+            if (optionsArgs.includes(arg)) {
+                if (!cleanedUp) {
+                    cleanedUp = true;
+                    this.options.forEach((option) => {
+                        option.selected = false;
+                    });
+                }
+
+                const option = this.options.find((option) => option.argName === arg);
+                
+                if (option) {
+                    option.selected = true;
+                }
+            }
+        });
+    }
+
     printWelcomeMessage() {
         const r = this.console.getResetSequence();
-        const t = this.p.text;
         const p = this.p.primary;
-        const s = this.p.secondary;
         const T = this.p.textBright;
 
         console.log(`\n${T}  Create Symfony FE App - Version ${p}${this.version}${r}\n`);
+    }
+
+    printInstructions() {
+        const t = this.p.text;
+        const s = this.p.secondary;
+        const r = this.console.getResetSequence();
 
         this.console.printFormattedRgbColor(t, null, '  Choose the components you want to add to your symfony application:\n');
 
@@ -67,6 +112,7 @@ export class Application {
     }
 
     startInputLoop() {
+        this.printOptions();
         readline.emitKeypressEvents(process.stdin);
 
         if (process.stdin.isTTY) {
@@ -123,10 +169,11 @@ export class Application {
         console.log(`  ${T}Installing client...${r}\n`);
     }
 
-    private async runTasks() {
+    async runTasks() {
         if (
-            !(await this.tasks.queryInstallNpmPackages(this.options)) ||
-            !(await this.tasks.queryInstallComposerPackages(this.options))
+            !this.noInteractive &&
+            (!(await this.tasks.queryInstallNpmPackages(this.options)) ||
+            !(await this.tasks.queryInstallComposerPackages(this.options)))
         ) {
             process.exit(0);
         }
@@ -174,10 +221,10 @@ export class Application {
 
     private getDefaultOptions(): AppOptions {
         return [
-            { name: 'TypeScript StimulusJS Controlleres', taskId: 'typescript-stimulus-controllers', selected: true },
-            { name: 'TypeScript React Components', taskId: 'typescript-react-components', selected: false },
-            { name: 'TailwindCSS', taskId: 'tailwindcss', selected: false },
-            { name: 'OxLint / OxFormat', taskId: 'oxlint-oxformat', selected: true },
+            { name: 'TypeScript StimulusJS Controlleres', taskId: 'typescript-stimulus-controllers', selected: true, argName: '--stimulus' },
+            { name: 'TypeScript React Components', taskId: 'typescript-react-components', selected: false, argName: '--react' },
+            { name: 'TailwindCSS', taskId: 'tailwindcss', selected: false, argName: '--tailwind' },
+            { name: 'OxLint / OxFormat', taskId: 'oxlint-oxformat', selected: true, argName: '--oxlint' },
         ];
     }
 }
