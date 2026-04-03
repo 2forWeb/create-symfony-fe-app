@@ -539,7 +539,7 @@ var TsconfigAsset = class extends BaseAsset {
 var HelloAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
-		this.name = "Hello.ts";
+		this.name = "Hello.tsx";
 		this.relativePath = "client/react";
 	}
 	getContents() {
@@ -639,7 +639,7 @@ var TaskService = class {
 			{
 				name: "typescript-react-components",
 				composerPackages: ["symfony/ux-react"],
-				npmPackages: ["@types/react", "react@18"],
+				npmPackages: ["@types/react@18", "react@18"],
 				tasks: [new ReactInitTask()],
 				npmScripts: {
 					"build:react": "node ./node_modules/.bin/vite build --config vite.react.config.js",

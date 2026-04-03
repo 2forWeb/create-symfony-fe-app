@@ -51,7 +51,7 @@ export class TaskService {
             {
                 name: 'typescript-react-components',
                 composerPackages: ['symfony/ux-react'],
-                npmPackages: ['@types/react', 'react@18'],
+                npmPackages: ['@types/react@18', 'react@18'],
                 tasks: [new ReactInitTask()],
                 npmScripts: {
                     'build:react': 'node ./node_modules/.bin/vite build --config vite.react.config.js',

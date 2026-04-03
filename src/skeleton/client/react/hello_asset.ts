@@ -1,7 +1,7 @@
 import { BaseAsset } from '../../base-asset';
 
 export class HelloAsset extends BaseAsset {
-    name = 'Hello.ts';
+    name = 'Hello.tsx';
     relativePath = 'client/react';
 
     getContents(): string {
