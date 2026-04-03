@@ -17,7 +17,7 @@ export class GitIgnoreTask extends BaseTask {
             const gitIgnorePath = resolve(process.cwd(), '.gitignore');
             const fileExists = fs.existsSync(gitIgnorePath);
             const lines = this.gitIgnore.join('\n');
-            const content = fileExists ? `\n${lines}` : lines;
+            const content = fileExists ? `\n${lines}\n` : `${lines}\n`;
 
             fs.writeFile(
                 gitIgnorePath,

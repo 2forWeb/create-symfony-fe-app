@@ -348,7 +348,10 @@ var NpmScriptsTask = class extends BaseTask {
 	}
 	async doRun() {
 		return new Promise((r, reject) => {
-			if (!this.npmScripts) r(void 0);
+			if (!this.npmScripts) {
+				r(void 0);
+				return;
+			}
 			const packageJsonPath = (0, path.resolve)(process.cwd(), "package.json");
 			if (!node_fs.default.existsSync(packageJsonPath)) throw new Error(`Could not find package.json in ${process.cwd()}`);
 			node_fs.default.readFile(packageJsonPath, "utf-8", (err, data) => {
@@ -369,6 +372,62 @@ var NpmScriptsTask = class extends BaseTask {
 				}
 			});
 		});
+	}
+};
+//#endregion
+//#region src/tasks/git-ignore-task.ts
+var GitIgnoreTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Adding Git Ignore Statements";
+	}
+	async doRun() {
+		await new Promise((r, reject) => {
+			if (!this.gitIgnore) {
+				r(void 0);
+				return;
+			}
+			const gitIgnorePath = (0, path.resolve)(process.cwd(), ".gitignore");
+			const fileExists = node_fs.default.existsSync(gitIgnorePath);
+			const lines = this.gitIgnore.join("\n");
+			const content = fileExists ? `\n${lines}\n` : `${lines}\n`;
+			node_fs.default.writeFile(gitIgnorePath, content, fileExists ? { flag: "a" } : {}, (error) => {
+				if (error) reject(/* @__PURE__ */ new Error(`Failed to add git ignore statements: ${error.message}`));
+				else r(void 0);
+			});
+		});
+	}
+};
+//#endregion
+//#region src/tasks/symfony-local-commands-task.ts
+var SymfonyLocalCommandsTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Adding Symfony Local Commands";
+	}
+	async doRun() {
+		await new Promise((r, reject) => {
+			if (!this.symfonyLocalCommands) {
+				r(void 0);
+				return;
+			}
+			const symfonyLocalCommandsPath = (0, path.resolve)(process.cwd(), ".symfony.local.yaml");
+			const fileExists = node_fs.default.existsSync(symfonyLocalCommandsPath);
+			const content = fileExists ? this.getSymfonyLocalCommandsContents() : `workers:\n${this.getSymfonyLocalCommandsContents()}`;
+			node_fs.default.writeFile(symfonyLocalCommandsPath, content, fileExists ? { flag: "a" } : {}, (error) => {
+				if (error) reject(/* @__PURE__ */ new Error(`Failed to add symfony local commands: ${error.message}`));
+				else r(void 0);
+			});
+		});
+	}
+	getSymfonyLocalCommandsContents() {
+		const contents = ["\n"];
+		for (const [commandName, commandValue] of Object.entries(this.symfonyLocalCommands ?? {})) {
+			contents.push(`    ${commandName}:\n`);
+			for (const command of commandValue) contents.push(`        ${command}\n`);
+			contents.push("\n");
+		}
+		return contents.join("");
 	}
 };
 //#endregion
@@ -463,6 +522,8 @@ var TaskService = class {
 		const composerPackages = this.getComposerPackages(options);
 		const npmPackages = this.getNpmPackages(options);
 		const npmScripts = this.getNpmScripts(options);
+		const gitIgnoreStatements = this.getGitIgnoreStatements(options);
+		const symfonyLocalCommands = this.getSymfonyLocalCommands(options);
 		const installTasks = [];
 		if (composerPackages.length > 0) {
 			const composerTask = new ComposerTask();
@@ -476,13 +537,19 @@ var TaskService = class {
 		}
 		const mutateTasks = [];
 		for (const task of this.getSelectedTasks(options)) mutateTasks.push(...task.tasks);
-		const npmScriptsTask = new NpmScriptsTask();
-		npmScriptsTask.npmScripts = npmScripts;
+		const npmScriptsTask = Object.keys(npmScripts).length > 0 ? new NpmScriptsTask() : null;
+		if (npmScriptsTask) npmScriptsTask.npmScripts = npmScripts;
+		const gitIgnoreTask = gitIgnoreStatements.length > 0 ? new GitIgnoreTask() : null;
+		if (gitIgnoreTask) gitIgnoreTask.gitIgnore = gitIgnoreStatements;
+		const symfonyLocalCommandsTask = Object.keys(symfonyLocalCommands).length > 0 ? new SymfonyLocalCommandsTask() : null;
+		if (symfonyLocalCommandsTask) symfonyLocalCommandsTask.symfonyLocalCommands = symfonyLocalCommands;
 		return [
 			...this.shouldInitializeNpm() ? [new NpmInitTask()] : [],
 			...installTasks,
 			...mutateTasks,
-			...Object.keys(npmScripts).length > 0 ? [npmScriptsTask] : []
+			...npmScriptsTask ? [npmScriptsTask] : [],
+			...gitIgnoreTask ? [gitIgnoreTask] : [],
+			...symfonyLocalCommandsTask ? [symfonyLocalCommandsTask] : []
 		];
 	}
 	shouldInitializeNpm() {
@@ -518,6 +585,25 @@ var TaskService = class {
 			};
 		});
 		return npmScripts;
+	}
+	getGitIgnoreStatements(options) {
+		const selectedTasks = this.getSelectedTasks(options);
+		const gitIgnoreStatements = [];
+		selectedTasks.forEach((task) => {
+			if (task.gitIgnore) gitIgnoreStatements.push(...task.gitIgnore);
+		});
+		return gitIgnoreStatements;
+	}
+	getSymfonyLocalCommands(options) {
+		const selectedTasks = this.getSelectedTasks(options);
+		let symfonyLocalCommands = {};
+		selectedTasks.forEach((task) => {
+			if (task.symfonyLocalCommand) symfonyLocalCommands = {
+				...symfonyLocalCommands,
+				...task.symfonyLocalCommand
+			};
+		});
+		return symfonyLocalCommands;
 	}
 	getSelectedTasks(options) {
 		const taskData = this.getTasks();
