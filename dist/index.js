@@ -431,6 +431,85 @@ var SymfonyLocalCommandsTask = class extends BaseTask {
 	}
 };
 //#endregion
+//#region src/skeleton/oxlintrc_asset.ts
+var OxlintRcAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = ".oxlintrc.json";
+		this.relativePath = "./";
+	}
+	getContents() {
+		return JSON.stringify(this.getJsonContents(), null, 2);
+	}
+	getJsonContents() {
+		return {
+			$schema: "./node_modules/oxlint/configuration_schema.json",
+			plugins: [
+				"oxc",
+				"typescript",
+				"unicorn",
+				"node"
+			],
+			env: {
+				builtin: true,
+				browser: true
+			},
+			ignorePatterns: [
+				"**",
+				"!client/",
+				"!client/**/*.ts",
+				"!client/**/*.tsx"
+			]
+		};
+	}
+};
+//#endregion
+//#region src/skeleton/oxfmtrc_asset.ts
+var OxfmtRcAsset = class extends BaseAsset {
+	constructor(..._args) {
+		super(..._args);
+		this.name = ".oxfmtrc.json";
+		this.relativePath = "./";
+	}
+	getContents() {
+		return JSON.stringify(this.getJsonContents(), null, 2);
+	}
+	getJsonContents() {
+		return {
+			$schema: "./node_modules/oxfmt/configuration_schema.json",
+			printWidth: 130,
+			tabWidth: 4,
+			trailingComma: "es5",
+			semi: true,
+			singleQuote: true,
+			ignorePatterns: [
+				"**",
+				"!client/",
+				"!client/**/*.ts",
+				"!client/**/*.tsx",
+				"!assets/",
+				"!assets/styles/**/*.css"
+			]
+		};
+	}
+};
+//#endregion
+//#region src/tasks/oxlint-init-task.ts
+var OxLintInitTask = class extends BaseTask {
+	constructor(..._args) {
+		super(..._args);
+		this.name = "Creating the Oxlint environment";
+	}
+	async doRun() {
+		try {
+			await new FileAssetService().generateAssets([new OxfmtRcAsset(), new OxlintRcAsset()]);
+		} catch (error) {
+			this.errorMessage = error.message;
+			throw error;
+		}
+	}
+};
+//#endregion
 //#region src/service/task-service.ts
 var TaskService = class {
 	constructor() {
@@ -483,7 +562,7 @@ var TaskService = class {
 				name: "oxlint-oxformat",
 				composerPackages: [],
 				npmPackages: ["oxlint", "oxfmt"],
-				tasks: [],
+				tasks: [new OxLintInitTask()],
 				npmScripts: {
 					lint: "oxlint && npm run fmt",
 					fmt: "oxfmt --check",

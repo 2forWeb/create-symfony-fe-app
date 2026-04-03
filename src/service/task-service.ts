@@ -15,6 +15,7 @@ import { StimulusInitTask } from '../tasks/stimulus-init-task';
 import { NpmScriptsTask } from '../tasks/npm-scripts-task';
 import { GitIgnoreTask } from '../tasks/git-ignore-task';
 import { SymfonyLocalCommandsTask } from '../tasks/symfony-local-commands-task';
+import { OxLintInitTask } from '../tasks/oxlint-init-task';
 
 export class TaskService {
     console: ConsoleService;
@@ -79,15 +80,12 @@ export class TaskService {
                 name: 'oxlint-oxformat',
                 composerPackages: [],
                 npmPackages: ['oxlint', 'oxfmt'],
-                tasks: [],
+                tasks: [new OxLintInitTask()],
                 npmScripts: {
                     lint: 'oxlint && npm run fmt',
                     fmt: 'oxfmt --check',
                     'fmt:fix': 'oxfmt',
                 },
-                /**
-                 * OxLintConfigTask
-                 */
             },
         ];
     }
