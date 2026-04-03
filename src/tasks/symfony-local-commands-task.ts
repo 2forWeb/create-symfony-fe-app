@@ -20,18 +20,13 @@ export class SymfonyLocalCommandsTask extends BaseTask {
                 ? this.getSymfonyLocalCommandsContents()
                 : `workers:\n${this.getSymfonyLocalCommandsContents()}`;
 
-            fs.writeFile(
-                symfonyLocalCommandsPath,
-                content,
-                fileExists ? { flag: 'a' } : {},
-                (error) => {
-                    if (error) {
-                        reject(new Error(`Failed to add symfony local commands: ${error.message}`));
-                    } else {
-                        r(undefined);
-                    }
-                },
-            );
+            fs.writeFile(symfonyLocalCommandsPath, content, fileExists ? { flag: 'a' } : {}, (error) => {
+                if (error) {
+                    reject(new Error(`Failed to add symfony local commands: ${error.message}`));
+                } else {
+                    r(undefined);
+                }
+            });
         });
     }
 

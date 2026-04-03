@@ -1,7 +1,7 @@
 import { BaseTask } from './base-task';
 import { FileAssetService } from '../service/file-asset-service';
 import { TsconfigAsset } from '../skeleton/client/controllers/tsconfig_asset';
-import HelloControllerAsset from '../skeleton/client/controllers/hello_controller_asset';
+import { HelloControllerAsset } from '../skeleton/client/controllers/hello_controller_asset';
 import { ViteStimulusConfigAsset } from '../skeleton/vite-stimulus-config_asset';
 import fs from 'node:fs';
 import { resolve } from 'path';
@@ -51,11 +51,9 @@ export class StimulusInitTask extends BaseTask {
             const assetManager = new FileAssetService();
 
             const promises = [];
-            promises.push(assetManager.generateAssets([
-                new HelloControllerAsset(),
-                new TsconfigAsset(),
-                new ViteStimulusConfigAsset(),
-            ]));
+            promises.push(
+                assetManager.generateAssets([new HelloControllerAsset(), new TsconfigAsset(), new ViteStimulusConfigAsset()])
+            );
 
             promises.push(this.copyOriginalControllers());
 

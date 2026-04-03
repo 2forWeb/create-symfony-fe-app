@@ -41,9 +41,7 @@ export class TaskService {
                     'build:stimulus:watch': 'node ./node_modules/.bin/vite build --config vite.stimulus.config.js --watch',
                     'typecheck:stimulus': 'tsc --project client/controllers/tsconfig.json --noEmit',
                 },
-                gitIgnore: [
-                    'assets/controllers',
-                ],
+                gitIgnore: ['assets/controllers'],
                 symfonyLocalCommand: {
                     'vite-stimulus': ["cmd: ['npm', 'run','build:stimulus:watch']"],
                 },
@@ -58,9 +56,7 @@ export class TaskService {
                     'build:react:watch': 'node ./node_modules/.bin/vite build --config vite.react.config.js --watch',
                     'typecheck:react': 'tsc --project client/react/tsconfig.json --noEmit',
                 },
-                gitIgnore: [
-                    'assets/react',
-                ],
+                gitIgnore: ['assets/react'],
                 symfonyLocalCommand: {
                     'vite-react': ["cmd: ['npm', 'run','build:react:watch']"],
                 },

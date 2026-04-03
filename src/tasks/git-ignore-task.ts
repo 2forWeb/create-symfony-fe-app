@@ -19,18 +19,13 @@ export class GitIgnoreTask extends BaseTask {
             const lines = this.gitIgnore.join('\n');
             const content = fileExists ? `\n${lines}\n` : `${lines}\n`;
 
-            fs.writeFile(
-                gitIgnorePath,
-                content,
-                fileExists ? { flag: 'a' } : {},
-                (error) => {
-                    if (error) {
-                        reject(new Error(`Failed to add git ignore statements: ${error.message}`));
-                    } else {
-                        r(undefined);
-                    }
-                },
-            );
+            fs.writeFile(gitIgnorePath, content, fileExists ? { flag: 'a' } : {}, (error) => {
+                if (error) {
+                    reject(new Error(`Failed to add git ignore statements: ${error.message}`));
+                } else {
+                    r(undefined);
+                }
+            });
         });
     }
 }

@@ -27,7 +27,7 @@ export class NpmScriptsTask extends BaseTask {
                     const packageJson = JSON.parse(data) as {
                         scripts?: Record<string, string>;
                     } & Record<string, unknown>;
-                    
+
                     packageJson.scripts ??= {};
 
                     for (const [scriptName, scriptValue] of Object.entries(this.npmScripts ?? {})) {

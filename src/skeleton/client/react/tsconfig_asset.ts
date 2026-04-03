@@ -2,7 +2,7 @@ import { BaseAsset } from '../../base-asset';
 
 export class TsconfigAsset extends BaseAsset {
     name = 'tsconfig.json';
-    relativePath = 'client/controllers';
+    relativePath = 'client/react';
 
     getContents(): string {
         return JSON.stringify(this.getJsonContents(), null, 2);
@@ -14,7 +14,6 @@ export class TsconfigAsset extends BaseAsset {
                 module: 'ES2020',
                 target: 'ES2020',
                 allowJs: false,
-                noEmit: true,
                 moduleResolution: 'node',
                 declaration: false,
                 esModuleInterop: true,
@@ -25,9 +24,9 @@ export class TsconfigAsset extends BaseAsset {
                 removeComments: false,
                 preserveConstEnums: true,
                 baseUrl: './',
-                jsx: 'react',
+                outDir: '../../assets/controllers',
             },
-            include: ['./**/*.tsx'],
+            include: ['./**/*.ts'],
             exclude: ['node_modules', '**/*.spec.ts'],
         };
     }

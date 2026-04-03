@@ -1,6 +1,6 @@
 import { BaseAsset } from '../../base-asset';
 
-export default class HelloControllerAsset extends BaseAsset {
+export class HelloControllerAsset extends BaseAsset {
     name = 'hello_controller.ts';
     relativePath = 'client/controllers';
 
