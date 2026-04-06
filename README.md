@@ -42,13 +42,13 @@ The tool will add **`symfony local`** watcher commands where applicable so that 
 Install the application by running:
 
 ```bash
-npm i --save-dev create-symfony-fe-app
+npm i --save-dev @2forweb/create-symfony-fe-app
 ```
 
 or globally by running:
 
 ```bash
-npm i -g create-symfony-fe-app
+npm i -g @2forweb/create-symfony-fe-app
 ```
 
 ## How to run
