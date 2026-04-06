@@ -1,5 +1,5 @@
 {
-    "name": "create-symfony-fe-app",
+    "name": "@2forweb/create-symfony-fe-app",
     "version": "1.0.0",
     "description": "A tool to create a fancy vite based symfony front-end application where you can maintain your stimulus and react controllers in TypeScript on its own folder",
     "keywords": [
