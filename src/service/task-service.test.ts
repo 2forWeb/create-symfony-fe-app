@@ -185,7 +185,7 @@ describe('TaskService', () => {
                 expect(prepared[6].name).toEqual('Adding Symfony Local Commands');
                 expect((prepared[6] as SymfonyLocalCommandsTask).symfonyLocalCommands).toEqual({
                     'vite-stimulus': ["cmd: ['npm', 'run', 'build:stimulus:watch']"],
-                });      
+                });
             } finally {
                 process.chdir(originalCwd);
                 fs.rmSync(dir, { recursive: true, force: true });
