@@ -87,9 +87,7 @@ describe('ConsoleService', () => {
         it('logs message wrapped with fg, optional bg, and reset', () => {
             service.printRgbColor({ r: 1, g: 2, b: 3 }, { r: 4, g: 5, b: 6 }, 'hello');
             expect(logSpy).toHaveBeenCalledTimes(1);
-            expect(logSpy.mock.calls[0][0]).toBe(
-                '\x1b[48;2;4;5;6m\x1b[38;2;1;2;3mhello\x1b[0m'
-            );
+            expect(logSpy.mock.calls[0][0]).toBe('\x1b[48;2;4;5;6m\x1b[38;2;1;2;3mhello\x1b[0m');
         });
 
         it('omits background when bg is null', () => {
