@@ -1,5 +1,7 @@
 # create-symfony-fe-app
 
+[![Node Tests](https://github.com/2forWeb/create-symfony-fe-app/actions/workflows/node.js.yml/badge.svg)](https://github.com/2forWeb/create-symfony-fe-app/actions/workflows/node.js.yml)
+
 `create-symfony-fe-app` is a Command-line tool that adds a `TypeScript` based frontend scaffolding based on **Vite** to an existing **Symfony** project. This command will create a `client` folder with the following optional elements:
 
 - `TypeScript` `StimlusJS` controllers under `/client/controllers`
