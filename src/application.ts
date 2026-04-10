@@ -26,8 +26,17 @@ export class Application {
         this.console = new ConsoleService();
         this.p = this.console.getPalette();
 
-        this.options = this.getDefaultOptions();
+        this.options = Application.getDefaultOptions();
         this.tasks = new TaskService();
+    }
+
+    static getDefaultOptions(): AppOptions {
+        return [
+            { name: 'TypeScript StimulusJS Controlleres', taskId: 'typescript-stimulus-controllers', selected: true, argName: '--stimulus' },
+            { name: 'TypeScript React Components', taskId: 'typescript-react-components', selected: false, argName: '--react' },
+            { name: 'TailwindCSS', taskId: 'tailwindcss', selected: false, argName: '--tailwind' },
+            { name: 'OxLint / OxFormat', taskId: 'oxlint-oxformat', selected: true, argName: '--oxlint' },
+        ];
     }
 
     parseParameters() {
@@ -219,12 +228,4 @@ export class Application {
         }
     }
 
-    private getDefaultOptions(): AppOptions {
-        return [
-            { name: 'TypeScript StimulusJS Controlleres', taskId: 'typescript-stimulus-controllers', selected: true, argName: '--stimulus' },
-            { name: 'TypeScript React Components', taskId: 'typescript-react-components', selected: false, argName: '--react' },
-            { name: 'TailwindCSS', taskId: 'tailwindcss', selected: false, argName: '--tailwind' },
-            { name: 'OxLint / OxFormat', taskId: 'oxlint-oxformat', selected: true, argName: '--oxlint' },
-        ];
-    }
 }
