@@ -12,10 +12,13 @@ export class TailwindInitTask extends BaseTask {
                     reject(new Error(`Failed to initialize Tailwind: ${stderr}`));
                 } else {
                     // Fix the generated css so that it complies with oxfmt rules
-                    fs.writeFileSync('assets/styles/app.css',
-                        fs.readFileSync('assets/styles/app.css')
+                    fs.writeFileSync(
+                        'assets/styles/app.css',
+                        fs
+                            .readFileSync('assets/styles/app.css')
                             .toString()
-                            .replace(/import "tailwindcss"/g, "import 'tailwindcss'"));
+                            .replace(/import "tailwindcss"/g, "import 'tailwindcss'")
+                    );
 
                     resolve(undefined);
                 }

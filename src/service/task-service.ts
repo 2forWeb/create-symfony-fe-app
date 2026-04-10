@@ -39,7 +39,7 @@ export class TaskService {
                 npmPackages: [],
                 tasks: [new TailwindInitTask()],
                 symfonyLocalCommand: {
-                    'tailwind': ["cmd: ['symfony', 'console', 'tailwind:build', '--watch']"],
+                    tailwind: ["cmd: ['symfony', 'console', 'tailwind:build', '--watch']"],
                 },
             },
             {
