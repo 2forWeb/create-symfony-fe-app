@@ -14,7 +14,7 @@
     "license": "ISC",
     "author": "Matias Jose",
     "bin": {
-        "create-symfony-fe-app": "./dist/index.js"
+        "create-symfony-fe-app": "dist/index.js"
     },
     "type": "commonjs",
     "main": "index.js",
