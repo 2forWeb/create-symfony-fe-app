@@ -243,7 +243,7 @@ export class TaskService {
 
     getGitIgnoreStatements(options: AppOptions): string[] {
         const selectedTasks = this.getSelectedTasks(options);
-        const gitIgnoreStatements: string[] = [];
+        const gitIgnoreStatements: string[] = ['/node_modules/'];
 
         selectedTasks.forEach((task) => {
             if (task.gitIgnore) {

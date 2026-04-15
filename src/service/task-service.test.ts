@@ -128,7 +128,7 @@ describe('TaskService', () => {
 
     describe('getGitIgnoreStatements', () => {
         it('collects gitignore entries from selected stacks for Application defaults', () => {
-            expect(service.getGitIgnoreStatements(Application.getDefaultOptions())).toEqual(['/assets/controllers/']);
+            expect(service.getGitIgnoreStatements(Application.getDefaultOptions())).toEqual(['/node_modules/', '/assets/controllers/']);
         });
     });
 
@@ -181,7 +181,7 @@ describe('TaskService', () => {
                 expect(prepared[4].name).toEqual('Adding NPM scripts to package.json');
                 expect((prepared[4] as NpmScriptsTask).npmScripts).toEqual(EXPECT_DEFAULT_NPM_SCRIPTS);
                 expect(prepared[5].name).toEqual('Adding Git Ignore Statements');
-                expect((prepared[5] as GitIgnoreTask).gitIgnore).toEqual(['/assets/controllers/']);
+                expect((prepared[5] as GitIgnoreTask).gitIgnore).toEqual(['/node_modules/', '/assets/controllers/']);
                 expect(prepared[6].name).toEqual('Adding Symfony Local Commands');
                 expect((prepared[6] as SymfonyLocalCommandsTask).symfonyLocalCommands).toEqual({
                     'vite-stimulus': ["cmd: ['npm', 'run', 'build:stimulus:watch']"],

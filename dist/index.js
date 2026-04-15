@@ -75,7 +75,7 @@ var ConsoleService = class {
 //#region src/service/version-service.ts
 var VersionService = class {
 	getVersion() {
-		return "1.0.0";
+		return "1.0.1";
 	}
 };
 //#endregion
@@ -632,7 +632,7 @@ var TaskService = class {
 				composerPackages: ["symfonycasts/tailwind-bundle"],
 				npmPackages: [],
 				tasks: [new TailwindInitTask()],
-				symfonyLocalCommand: { "tailwind": ["cmd: ['symfony', 'console', 'tailwind:build', '--watch']"] }
+				symfonyLocalCommand: { tailwind: ["cmd: ['symfony', 'console', 'tailwind:build', '--watch']"] }
 			},
 			{
 				name: "typescript-stimulus-controllers",
@@ -769,7 +769,7 @@ var TaskService = class {
 	}
 	getGitIgnoreStatements(options) {
 		const selectedTasks = this.getSelectedTasks(options);
-		const gitIgnoreStatements = [];
+		const gitIgnoreStatements = ["/node_modules/"];
 		selectedTasks.forEach((task) => {
 			if (task.gitIgnore) gitIgnoreStatements.push(...task.gitIgnore);
 		});
@@ -826,16 +826,44 @@ var TaskService = class {
 	}
 };
 //#endregion
-//#region src/application.ts
-var Application = class {
+//#region src/index.ts
+var app = new class Application {
 	constructor() {
 		this.selectedIndex = 0;
 		this.noInteractive = false;
 		this.version = new VersionService().getVersion();
 		this.console = new ConsoleService();
 		this.p = this.console.getPalette();
-		this.options = this.getDefaultOptions();
+		this.options = Application.getDefaultOptions();
 		this.tasks = new TaskService();
+	}
+	static getDefaultOptions() {
+		return [
+			{
+				name: "TypeScript StimulusJS Controlleres",
+				taskId: "typescript-stimulus-controllers",
+				selected: true,
+				argName: "--stimulus"
+			},
+			{
+				name: "TypeScript React Components",
+				taskId: "typescript-react-components",
+				selected: false,
+				argName: "--react"
+			},
+			{
+				name: "TailwindCSS",
+				taskId: "tailwindcss",
+				selected: false,
+				argName: "--tailwind"
+			},
+			{
+				name: "OxLint / OxFormat",
+				taskId: "oxlint-oxformat",
+				selected: true,
+				argName: "--oxlint"
+			}
+		];
 	}
 	parseParameters() {
 		const d = this.p.danger;
@@ -961,38 +989,7 @@ var Application = class {
 			console.log(`\n  ${S}All tasks completed successfully!${r}\n\n`);
 		}
 	}
-	getDefaultOptions() {
-		return [
-			{
-				name: "TypeScript StimulusJS Controlleres",
-				taskId: "typescript-stimulus-controllers",
-				selected: true,
-				argName: "--stimulus"
-			},
-			{
-				name: "TypeScript React Components",
-				taskId: "typescript-react-components",
-				selected: false,
-				argName: "--react"
-			},
-			{
-				name: "TailwindCSS",
-				taskId: "tailwindcss",
-				selected: false,
-				argName: "--tailwind"
-			},
-			{
-				name: "OxLint / OxFormat",
-				taskId: "oxlint-oxformat",
-				selected: true,
-				argName: "--oxlint"
-			}
-		];
-	}
-};
-//#endregion
-//#region src/index.ts
-var app = new Application();
+}();
 app.printWelcomeMessage();
 app.parseParameters();
 if (app.noInteractive) app.runTasks();
