@@ -128,7 +128,10 @@ describe('TaskService', () => {
 
     describe('getGitIgnoreStatements', () => {
         it('collects gitignore entries from selected stacks for Application defaults', () => {
-            expect(service.getGitIgnoreStatements(Application.getDefaultOptions())).toEqual(['/node_modules/', '/assets/controllers/']);
+            expect(service.getGitIgnoreStatements(Application.getDefaultOptions())).toEqual([
+                '/node_modules/',
+                '/assets/controllers/',
+            ]);
         });
     });
 
