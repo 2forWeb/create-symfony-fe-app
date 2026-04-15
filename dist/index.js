@@ -75,7 +75,7 @@ var ConsoleService = class {
 //#region src/service/version-service.ts
 var VersionService = class {
 	getVersion() {
-		return "1.0.1";
+		return "1.0.2";
 	}
 };
 //#endregion
@@ -366,8 +366,12 @@ var NpmScriptsTask = class extends BaseTask {
 					const scriptNames = Object.keys(this.npmScripts ?? {});
 					const buildStimulusScript = scriptNames.includes("build:stimulus") ? "npm run build:stimulus" : "";
 					const buildReactScript = scriptNames.includes("build:react") ? "npm run build:react" : "";
-					const connector = buildStimulusScript && buildReactScript ? " && " : "";
-					packageJson.scripts["build"] = `${buildStimulusScript} ${connector} ${buildReactScript}`.trim();
+					const buildConnector = buildStimulusScript && buildReactScript ? " && " : "";
+					const typeCheckStimulusScript = scriptNames.includes("typecheck:stimulus") ? "npm run typecheck:stimulus" : "";
+					const typeCheckReactScript = scriptNames.includes("typecheck:react") ? "npm run typecheck:react" : "";
+					const typeCheckConnector = typeCheckStimulusScript && typeCheckReactScript ? " && " : "";
+					packageJson.scripts["build"] = `${buildStimulusScript} ${buildConnector} ${buildReactScript}`.trim();
+					packageJson.scripts["typecheck"] = `${typeCheckStimulusScript} ${typeCheckConnector} ${typeCheckReactScript}`.trim();
 					node_fs.default.writeFile(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, (err) => {
 						if (err) reject(/* @__PURE__ */ new Error(`Failed to write package.json: ${err.message}`));
 						else r(void 0);

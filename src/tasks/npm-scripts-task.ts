@@ -37,9 +37,17 @@ export class NpmScriptsTask extends BaseTask {
                     const scriptNames = Object.keys(this.npmScripts ?? {});
                     const buildStimulusScript = scriptNames.includes('build:stimulus') ? 'npm run build:stimulus' : '';
                     const buildReactScript = scriptNames.includes('build:react') ? 'npm run build:react' : '';
-                    const connector = buildStimulusScript && buildReactScript ? ' && ' : '';
+                    const buildConnector = buildStimulusScript && buildReactScript ? ' && ' : '';
 
-                    packageJson.scripts['build'] = `${buildStimulusScript} ${connector} ${buildReactScript}`.trim();
+                    const typeCheckStimulusScript = scriptNames.includes('typecheck:stimulus')
+                        ? 'npm run typecheck:stimulus'
+                        : '';
+                    const typeCheckReactScript = scriptNames.includes('typecheck:react') ? 'npm run typecheck:react' : '';
+                    const typeCheckConnector = typeCheckStimulusScript && typeCheckReactScript ? ' && ' : '';
+
+                    packageJson.scripts['build'] = `${buildStimulusScript} ${buildConnector} ${buildReactScript}`.trim();
+                    packageJson.scripts['typecheck'] =
+                        `${typeCheckStimulusScript} ${typeCheckConnector} ${typeCheckReactScript}`.trim();
 
                     fs.writeFile(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, (err) => {
                         if (err) {
