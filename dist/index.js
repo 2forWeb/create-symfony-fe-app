@@ -1,5 +1,5 @@
 #! /usr/bin/env node
-//#region \0rolldown/runtime.js
+// \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -16,11 +16,10 @@ var __copyProps = (to, from, except, desc) => {
 	}
 	return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
 	value: mod,
 	enumerable: true
 }) : target, mod));
-//#endregion
 let node_readline = require("node:readline");
 node_readline = __toESM(node_readline);
 let node_child_process = require("node:child_process");
@@ -29,7 +28,7 @@ node_readline_promises = __toESM(node_readline_promises);
 let path = require("path");
 let node_fs = require("node:fs");
 node_fs = __toESM(node_fs);
-//#region src/service/console-service.ts
+// src/service/console-service.ts
 var ConsoleService = class {
 	printRgbColor(fgColor, bgColor, message) {
 		const fgColorCode = this.getRgbColor(fgColor);
@@ -71,15 +70,13 @@ var ConsoleService = class {
 		};
 	}
 };
-//#endregion
-//#region src/service/version-service.ts
+// src/service/version-service.ts
 var VersionService = class {
 	getVersion() {
 		return "1.0.2";
 	}
 };
-//#endregion
-//#region src/tasks/base-task.ts
+// src/tasks/base-task.ts
 var BaseTask = class {
 	constructor() {
 		this.name = "Base Task";
@@ -99,8 +96,7 @@ var BaseTask = class {
 		}
 	}
 };
-//#endregion
-//#region src/tasks/npm-task.ts
+// src/tasks/npm-task.ts
 var NpmTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -115,8 +111,7 @@ var NpmTask = class extends BaseTask {
 		});
 	}
 };
-//#endregion
-//#region src/tasks/npm-init-task.ts
+// src/tasks/npm-init-task.ts
 var NpmInitTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -131,8 +126,7 @@ var NpmInitTask = class extends BaseTask {
 		});
 	}
 };
-//#endregion
-//#region src/tasks/composer-task.ts
+// src/tasks/composer-task.ts
 var ComposerTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -147,8 +141,7 @@ var ComposerTask = class extends BaseTask {
 		});
 	}
 };
-//#endregion
-//#region src/tasks/tailwind-init-task.ts
+// src/tasks/tailwind-init-task.ts
 var TailwindInitTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -166,8 +159,7 @@ var TailwindInitTask = class extends BaseTask {
 		});
 	}
 };
-//#endregion
-//#region src/service/file-asset-service.ts
+// src/service/file-asset-service.ts
 var FileAssetService = class {
 	async generateAssets(assets) {
 		const promises = [];
@@ -181,8 +173,7 @@ var FileAssetService = class {
 		await Promise.all(promises);
 	}
 };
-//#endregion
-//#region src/skeleton/base-asset.ts
+// src/skeleton/base-asset.ts
 var BaseAsset = class {
 	constructor() {
 		this.name = "";
@@ -192,8 +183,7 @@ var BaseAsset = class {
 		return `${this.relativePath}/${this.name}`;
 	}
 };
-//#endregion
-//#region src/skeleton/client/controllers/tsconfig_asset.ts
+// src/skeleton/client/controllers/tsconfig_asset.ts
 var TsconfigAsset$1 = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -226,8 +216,7 @@ var TsconfigAsset$1 = class extends BaseAsset {
 		};
 	}
 };
-//#endregion
-//#region src/skeleton/client/controllers/hello_controller_asset.ts
+// src/skeleton/client/controllers/hello_controller_asset.ts
 var HelloControllerAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -248,8 +237,7 @@ export default class extends Controller {
 `;
 	}
 };
-//#endregion
-//#region src/skeleton/vite-stimulus-config_asset.ts
+// src/skeleton/vite-stimulus-config_asset.ts
 var ViteStimulusConfigAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -296,8 +284,7 @@ export default defineConfig({
 `;
 	}
 };
-//#endregion
-//#region src/tasks/stimulus-init-task.ts
+// src/tasks/stimulus-init-task.ts
 var StimulusInitTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -342,8 +329,7 @@ var StimulusInitTask = class extends BaseTask {
 		}
 	}
 };
-//#endregion
-//#region src/tasks/npm-scripts-task.ts
+// src/tasks/npm-scripts-task.ts
 var NpmScriptsTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -381,8 +367,7 @@ var NpmScriptsTask = class extends BaseTask {
 		});
 	}
 };
-//#endregion
-//#region src/tasks/git-ignore-task.ts
+// src/tasks/git-ignore-task.ts
 var GitIgnoreTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -405,8 +390,7 @@ var GitIgnoreTask = class extends BaseTask {
 		});
 	}
 };
-//#endregion
-//#region src/tasks/symfony-local-commands-task.ts
+// src/tasks/symfony-local-commands-task.ts
 var SymfonyLocalCommandsTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -437,8 +421,7 @@ var SymfonyLocalCommandsTask = class extends BaseTask {
 		return contents.join("");
 	}
 };
-//#endregion
-//#region src/skeleton/oxlintrc_asset.ts
+// src/skeleton/oxlintrc_asset.ts
 var OxlintRcAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -470,8 +453,7 @@ var OxlintRcAsset = class extends BaseAsset {
 		};
 	}
 };
-//#endregion
-//#region src/skeleton/oxfmtrc_asset.ts
+// src/skeleton/oxfmtrc_asset.ts
 var OxfmtRcAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -492,8 +474,7 @@ var OxfmtRcAsset = class extends BaseAsset {
 		};
 	}
 };
-//#endregion
-//#region src/tasks/oxlint-init-task.ts
+// src/tasks/oxlint-init-task.ts
 var OxLintInitTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -508,8 +489,7 @@ var OxLintInitTask = class extends BaseTask {
 		}
 	}
 };
-//#endregion
-//#region src/skeleton/client/react/tsconfig_asset.ts
+// src/skeleton/client/react/tsconfig_asset.ts
 var TsconfigAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -542,8 +522,7 @@ var TsconfigAsset = class extends BaseAsset {
 		};
 	}
 };
-//#endregion
-//#region src/skeleton/client/react/hello_asset.ts
+// src/skeleton/client/react/hello_asset.ts
 var HelloAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -559,8 +538,7 @@ export default function Hello() {
 `;
 	}
 };
-//#endregion
-//#region src/skeleton/vite-react-config_asset.ts
+// src/skeleton/vite-react-config_asset.ts
 var ViteReactConfigAsset = class extends BaseAsset {
 	constructor(..._args) {
 		super(..._args);
@@ -594,8 +572,7 @@ export default defineConfig({
 `;
 	}
 };
-//#endregion
-//#region src/tasks/react-init-task.ts
+// src/tasks/react-init-task.ts
 var ReactInitTask = class extends BaseTask {
 	constructor(..._args) {
 		super(..._args);
@@ -614,8 +591,7 @@ var ReactInitTask = class extends BaseTask {
 		}
 	}
 };
-//#endregion
-//#region src/service/task-service.ts
+// src/service/task-service.ts
 var TaskService = class {
 	constructor() {
 		this.spinnerFrames = [
@@ -738,7 +714,8 @@ var TaskService = class {
 		];
 	}
 	shouldInitializeNpm() {
-		return !(0, node_fs.existsSync)((0, path.resolve)(process.cwd(), "package.json"));
+		const packagesJsonPath = (0, path.resolve)(process.cwd(), "package.json");
+		return !(0, node_fs.existsSync)(packagesJsonPath);
 	}
 	getComposerPackages(options) {
 		const selectedTasks = this.getSelectedTasks(options);
@@ -829,13 +806,13 @@ var TaskService = class {
 		this.printTaskStatuses(tasks);
 	}
 };
-//#endregion
-//#region src/index.ts
+// src/index.ts
 var app = new class Application {
 	constructor() {
 		this.selectedIndex = 0;
 		this.noInteractive = false;
-		this.version = new VersionService().getVersion();
+		const versionService = new VersionService();
+		this.version = versionService.getVersion();
 		this.console = new ConsoleService();
 		this.p = this.console.getPalette();
 		this.options = Application.getDefaultOptions();
@@ -1001,4 +978,3 @@ else {
 	app.printInstructions();
 	app.startInputLoop();
 }
-//#endregion
