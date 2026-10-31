@@ -73,7 +73,7 @@ var ConsoleService = class {
 // src/service/version-service.ts
 var VersionService = class {
 	getVersion() {
-		return "1.0.2";
+		return "1.0.3";
 	}
 };
 // src/tasks/base-task.ts
